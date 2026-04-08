@@ -23,7 +23,7 @@
             tabPage3 = new TabPage();
             tabPage4 = new TabPage();
 
-            // Элементы управления - NumericUpDown вместо TextBox
+            // === TAB 1: INPUT CONTROLS ===
             lblProductionGroup = new Label();
             lblOutputVolume = new Label();
             nudOutputVolume = new NumericUpDown();
@@ -59,24 +59,53 @@
             btnSaveData = new Button();
             btnCalculate = new Button();
 
+            // === TAB 2: COST CALCULATION CONTROLS ===
+            groupBoxAccountingCosts = new GroupBox();
+            groupBoxInternalCosts = new GroupBox();
+            groupBoxByVolume = new GroupBox();
+
+            // Accounting
+            lblAccountingTitle = new Label();
+            lblAccountingCostsFormula = new Label();
+            lblAccountingCostsValue = new Label();
+            btnInfoAccounting = new Button();
+
+            // Internal
+            lblInternalTitle = new Label();
+            lblInternalCostsFormula = new Label();
+            lblInternalCostsValue = new Label();
+            btnInfoInternal = new Button();
+
+            // Volume Classification
+            lblFCTitle = new Label(); lblFCFormula = new Label(); lblFCValue = new Label(); btnInfoFC = new Button();
+            lblVCTitle = new Label(); lblVCFormula = new Label(); lblVCValue = new Label(); btnInfoVC = new Button();
+            lblTCTitle = new Label(); lblTCFormula = new Label(); lblTCValue = new Label(); btnInfoTC = new Button();
+            lblAFCTitle = new Label(); lblAFCFormula = new Label(); lblAFCValue = new Label(); btnInfoAFC = new Button();
+            lblAVCTitle = new Label(); lblAVCFormula = new Label(); lblAVCValue = new Label(); btnInfoAVC = new Button();
+            lblATCTitle = new Label(); lblATCFormula = new Label(); lblATCValue = new Label(); btnInfoATC = new Button();
+            lblMCTitle = new Label(); lblMCFormula = new Label(); lblMCValue = new Label(); btnInfoMC = new Button();
+
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
+            groupBoxAccountingCosts.SuspendLayout();
+            groupBoxInternalCosts.SuspendLayout();
+            groupBoxByVolume.SuspendLayout();
             SuspendLayout();
 
-            // tabControl1
+            // === TAB CONTROL ===
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
             tabControl1.Controls.Add(tabPage4);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
-            tabControl1.Multiline = true;
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(1024, 650);
             tabControl1.TabIndex = 0;
 
-            // tabPage1 - Ввод данных
+            // === TAB PAGE 1 (INPUT) ===
             tabPage1.AutoScroll = true;
             tabPage1.Controls.Add(btnCalculate);
             tabPage1.Controls.Add(btnSaveData);
@@ -113,326 +142,313 @@
             tabPage1.Padding = new Padding(15);
             tabPage1.Size = new Size(1016, 622);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "Ввод данных";
+            tabPage1.Text = "1. Ввод данных";
             tabPage1.UseVisualStyleBackColor = true;
 
-            // tabPage2
+            // === TAB PAGE 2 (CALCULATION) ===
+            tabPage2.AutoScroll = true;
+            tabPage2.Controls.Add(groupBoxByVolume);
+            tabPage2.Controls.Add(groupBoxInternalCosts);
+            tabPage2.Controls.Add(groupBoxAccountingCosts);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
+            tabPage2.Padding = new Padding(15);
             tabPage2.Size = new Size(1016, 622);
             tabPage2.TabIndex = 1;
-            tabPage2.Text = "Расчёт издержек";
+            tabPage2.Text = "2. Расчёт издержек";
             tabPage2.UseVisualStyleBackColor = true;
 
-            // tabPage3
+            // GroupBox: Accounting Costs
+            groupBoxAccountingCosts.Controls.Add(lblAccountingTitle);
+            groupBoxAccountingCosts.Controls.Add(lblAccountingCostsFormula);
+            groupBoxAccountingCosts.Controls.Add(lblAccountingCostsValue);
+            groupBoxAccountingCosts.Controls.Add(btnInfoAccounting);
+            groupBoxAccountingCosts.Location = new Point(15, 15);
+            groupBoxAccountingCosts.Name = "groupBoxAccountingCosts";
+            groupBoxAccountingCosts.Size = new Size(970, 100);
+            groupBoxAccountingCosts.TabIndex = 0;
+            groupBoxAccountingCosts.TabStop = false;
+            groupBoxAccountingCosts.Text = "Бухгалтерские (явные) издержки";
+
+            lblAccountingTitle.AutoSize = true;
+            lblAccountingTitle.Location = new Point(10, 30);
+            lblAccountingTitle.Text = "Сырье, ЗП, Амортизация, Налоги";
+
+            lblAccountingCostsFormula.AutoSize = false;
+            lblAccountingCostsFormula.Location = new Point(250, 25);
+            lblAccountingCostsFormula.Size = new Size(150, 35);
+            lblAccountingCostsFormula.Text = "FC + VC";
+            lblAccountingCostsFormula.BackColor = Color.FromArgb(240, 240, 240);
+            lblAccountingCostsFormula.BorderStyle = BorderStyle.FixedSingle;
+            lblAccountingCostsFormula.TextAlign = ContentAlignment.MiddleCenter;
+
+            lblAccountingCostsValue.AutoSize = true;
+            lblAccountingCostsValue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblAccountingCostsValue.ForeColor = Color.DodgerBlue;
+            lblAccountingCostsValue.Location = new Point(450, 30);
+            lblAccountingCostsValue.Text = "0 руб.";
+
+            btnInfoAccounting.Location = new Point(800, 25);
+            btnInfoAccounting.Size = new Size(100, 30);
+            btnInfoAccounting.Text = "ℹ Теория";
+            btnInfoAccounting.Click += BtnInfoAccounting_Click;
+
+            // GroupBox: Internal Costs
+            groupBoxInternalCosts.Controls.Add(lblInternalTitle);
+            groupBoxInternalCosts.Controls.Add(lblInternalCostsFormula);
+            groupBoxInternalCosts.Controls.Add(lblInternalCostsValue);
+            groupBoxInternalCosts.Controls.Add(btnInfoInternal);
+            groupBoxInternalCosts.Location = new Point(15, 125);
+            groupBoxInternalCosts.Name = "groupBoxInternalCosts";
+            groupBoxInternalCosts.Size = new Size(970, 80);
+            groupBoxInternalCosts.TabIndex = 1;
+            groupBoxInternalCosts.TabStop = false;
+            groupBoxInternalCosts.Text = "Внутренние (неявные) издержки";
+
+            lblInternalTitle.AutoSize = true;
+            lblInternalTitle.Location = new Point(10, 30);
+            lblInternalTitle.Text = "Упущенная ЗП, Рента, Процент";
+
+            lblInternalCostsFormula.AutoSize = false;
+            lblInternalCostsFormula.Location = new Point(250, 25);
+            lblInternalCostsFormula.Size = new Size(150, 35);
+            lblInternalCostsFormula.Text = "Опционально";
+            lblInternalCostsFormula.BackColor = Color.FromArgb(240, 240, 240);
+            lblInternalCostsFormula.BorderStyle = BorderStyle.FixedSingle;
+            lblInternalCostsFormula.TextAlign = ContentAlignment.MiddleCenter;
+
+            lblInternalCostsValue.AutoSize = true;
+            lblInternalCostsValue.ForeColor = Color.Gray;
+            lblInternalCostsValue.Location = new Point(450, 30);
+            lblInternalCostsValue.Text = "0 руб.";
+
+            btnInfoInternal.Location = new Point(800, 25);
+            btnInfoInternal.Size = new Size(100, 30);
+            btnInfoInternal.Text = "ℹ Теория";
+            btnInfoInternal.Click += BtnInfoInternal_Click;
+
+            // GroupBox: By Volume
+            groupBoxByVolume.Controls.Add(lblFCTitle); groupBoxByVolume.Controls.Add(lblFCFormula); groupBoxByVolume.Controls.Add(lblFCValue); groupBoxByVolume.Controls.Add(btnInfoFC);
+            groupBoxByVolume.Controls.Add(lblVCTitle); groupBoxByVolume.Controls.Add(lblVCFormula); groupBoxByVolume.Controls.Add(lblVCValue); groupBoxByVolume.Controls.Add(btnInfoVC);
+            groupBoxByVolume.Controls.Add(lblTCTitle); groupBoxByVolume.Controls.Add(lblTCFormula); groupBoxByVolume.Controls.Add(lblTCValue); groupBoxByVolume.Controls.Add(btnInfoTC);
+            groupBoxByVolume.Controls.Add(lblAFCTitle); groupBoxByVolume.Controls.Add(lblAFCFormula); groupBoxByVolume.Controls.Add(lblAFCValue); groupBoxByVolume.Controls.Add(btnInfoAFC);
+            groupBoxByVolume.Controls.Add(lblAVCTitle); groupBoxByVolume.Controls.Add(lblAVCFormula); groupBoxByVolume.Controls.Add(lblAVCValue); groupBoxByVolume.Controls.Add(btnInfoAVC);
+            groupBoxByVolume.Controls.Add(lblATCTitle); groupBoxByVolume.Controls.Add(lblATCFormula); groupBoxByVolume.Controls.Add(lblATCValue); groupBoxByVolume.Controls.Add(btnInfoATC);
+            groupBoxByVolume.Controls.Add(lblMCTitle); groupBoxByVolume.Controls.Add(lblMCFormula); groupBoxByVolume.Controls.Add(lblMCValue); groupBoxByVolume.Controls.Add(btnInfoMC);
+
+            groupBoxByVolume.Location = new Point(15, 220);
+            groupBoxByVolume.Name = "groupBoxByVolume";
+            groupBoxByVolume.Size = new Size(970, 400); // Немного уменьшил высоту группы, так как строк 7
+            groupBoxByVolume.TabIndex = 2;
+            groupBoxByVolume.TabStop = false;
+            groupBoxByVolume.Text = "Классификация по объёму производства (Краткосрочный период)";
+
+            // Helper to setup a row
+            void SetupRow(Label labelTitle, Label labelFormula, Label labelValue, Button btn, int yPos, string titleText, string formulaText, string valueText, EventHandler clickHandler)
+            {
+                labelTitle.Location = new Point(10, yPos);
+                labelTitle.AutoSize = true;
+                labelTitle.Text = titleText;
+
+                labelFormula.Location = new Point(180, yPos);
+                labelFormula.BackColor = Color.FromArgb(240, 240, 240);
+                labelFormula.BorderStyle = BorderStyle.FixedSingle;
+                labelFormula.Padding = new Padding(5);
+                labelFormula.Text = formulaText;
+                labelFormula.Width = 150;
+                labelFormula.Height = 35;
+                labelFormula.AutoSize = false;
+                labelFormula.TextAlign = ContentAlignment.MiddleCenter;
+
+                labelValue.Location = new Point(350, yPos + 8);
+                labelValue.AutoSize = true;
+                labelValue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                labelValue.ForeColor = Color.DarkBlue;
+                labelValue.Text = valueText;
+                labelValue.Width = 200;
+
+                btn.Location = new Point(800, yPos + 2);
+                btn.Size = new Size(100, 30);
+                btn.Text = "ℹ Теория";
+                btn.Click += clickHandler;
+            }
+
+            // ИСПРАВЛЕНО: Единый шаг 40 пикселей между всеми строками
+            SetupRow(lblFCTitle, lblFCFormula, lblFCValue, btnInfoFC, 25, "Постоянные (FC):", "Не зависят от Q", "0 руб.", BtnInfoFC_Click);
+            SetupRow(lblVCTitle, lblVCFormula, lblVCValue, btnInfoVC, 65, "Переменные (VC):", "Зависят от Q", "0 руб.", BtnInfoVC_Click);
+            SetupRow(lblTCTitle, lblTCFormula, lblTCValue, btnInfoTC, 105, "Совокупные (TC):", "TC = FC + VC", "0 руб.", BtnInfoTC_Click);
+
+            SetupRow(lblAFCTitle, lblAFCFormula, lblAFCValue, btnInfoAFC, 145, "Средние постоянные (AFC):", "AFC = FC / Q", "0 руб./шт.", BtnInfoAFC_Click);
+            SetupRow(lblAVCTitle, lblAVCFormula, lblAVCValue, btnInfoAVC, 185, "Средние переменные (AVC):", "AVC = VC / Q", "0 руб./шт.", BtnInfoAVC_Click);
+            SetupRow(lblATCTitle, lblATCFormula, lblATCValue, btnInfoATC, 225, "Средние общие (ATC):", "ATC = TC / Q", "0 руб./шт.", BtnInfoATC_Click);
+            SetupRow(lblMCTitle, lblMCFormula, lblMCValue, btnInfoMC, 265, "Предельные (MC):", "MC = AVC / ΔQ", "0 руб./шт.", BtnInfoMC_Click);
+
+            // === TAB 3 & 4 (EMPTY FOR NOW) ===
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
             tabPage3.Size = new Size(1016, 622);
             tabPage3.TabIndex = 2;
-            tabPage3.Text = "Расчёт себестоимости";
+            tabPage3.Text = "3. Себестоимость и Прибыль";
             tabPage3.UseVisualStyleBackColor = true;
 
-            // tabPage4
             tabPage4.Location = new Point(4, 24);
             tabPage4.Name = "tabPage4";
             tabPage4.Padding = new Padding(3);
             tabPage4.Size = new Size(1016, 622);
             tabPage4.TabIndex = 3;
-            tabPage4.Text = "Графики";
+            tabPage4.Text = "4. Графики";
             tabPage4.UseVisualStyleBackColor = true;
 
-            // lblProductionGroup
+            // === CONTROLS SETUP (TAB 1) ===
             lblProductionGroup.AutoSize = true;
             lblProductionGroup.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblProductionGroup.Location = new Point(15, 15);
-            lblProductionGroup.Name = "lblProductionGroup";
-            lblProductionGroup.Size = new Size(130, 19);
-            lblProductionGroup.TabIndex = 0;
             lblProductionGroup.Text = "Объём и цена";
 
-            // lblOutputVolume
             lblOutputVolume.AutoSize = true;
             lblOutputVolume.Location = new Point(15, 50);
-            lblOutputVolume.Name = "lblOutputVolume";
-            lblOutputVolume.Size = new Size(120, 15);
-            lblOutputVolume.TabIndex = 1;
-            lblOutputVolume.Text = "Объем выпуска Q:";
+            lblOutputVolume.Text = "Объем выпуска Q (шт):";
 
-            // nudOutputVolume
             nudOutputVolume.Location = new Point(250, 47);
-            nudOutputVolume.Name = "nudOutputVolume";
             nudOutputVolume.Size = new Size(150, 23);
-            nudOutputVolume.TabIndex = 2;
-            nudOutputVolume.Value = 0;
-            nudOutputVolume.TextAlign = HorizontalAlignment.Right;
             nudOutputVolume.ThousandsSeparator = true;
             nudOutputVolume.Maximum = 1000000000;
 
-            // lblPricePerUnit
             lblPricePerUnit.AutoSize = true;
             lblPricePerUnit.Location = new Point(15, 85);
-            lblPricePerUnit.Name = "lblPricePerUnit";
-            lblPricePerUnit.Size = new Size(135, 15);
-            lblPricePerUnit.TabIndex = 3;
-            lblPricePerUnit.Text = "Цена реализации P:";
+            lblPricePerUnit.Text = "Цена реализации P (руб):";
 
-            // nudPricePerUnit
             nudPricePerUnit.Location = new Point(250, 82);
-            nudPricePerUnit.Name = "nudPricePerUnit";
             nudPricePerUnit.Size = new Size(150, 23);
-            nudPricePerUnit.TabIndex = 4;
-            nudPricePerUnit.Value = 0;
-            nudPricePerUnit.TextAlign = HorizontalAlignment.Right;
+            nudPricePerUnit.DecimalPlaces = 2;
             nudPricePerUnit.ThousandsSeparator = true;
             nudPricePerUnit.Maximum = 1000000000;
-            nudPricePerUnit.DecimalPlaces = 2;
 
-            // lblVariableCostsGroup
             lblVariableCostsGroup.AutoSize = true;
             lblVariableCostsGroup.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblVariableCostsGroup.Location = new Point(15, 130);
-            lblVariableCostsGroup.Name = "lblVariableCostsGroup";
-            lblVariableCostsGroup.Size = new Size(260, 19);
-            lblVariableCostsGroup.TabIndex = 5;
             lblVariableCostsGroup.Text = "Переменные затраты на единицу";
 
-            // lblRawMaterials
             lblRawMaterials.AutoSize = true;
             lblRawMaterials.Location = new Point(15, 165);
-            lblRawMaterials.Name = "lblRawMaterials";
-            lblRawMaterials.Size = new Size(145, 15);
-            lblRawMaterials.TabIndex = 6;
-            lblRawMaterials.Text = "Сырье и материалы:";
-
-            // nudRawMaterials
+            lblRawMaterials.Text = "Сырье и материалы (руб/шт):";
             nudRawMaterials.Location = new Point(250, 162);
-            nudRawMaterials.Name = "nudRawMaterials";
             nudRawMaterials.Size = new Size(150, 23);
-            nudRawMaterials.TabIndex = 7;
-            nudRawMaterials.Value = 0;
-            nudRawMaterials.TextAlign = HorizontalAlignment.Right;
-            nudRawMaterials.ThousandsSeparator = true;
-            nudRawMaterials.Maximum = 1000000000;
             nudRawMaterials.DecimalPlaces = 2;
+            nudRawMaterials.ThousandsSeparator = true;
 
-            // lblEnergyTransport
             lblEnergyTransport.AutoSize = true;
             lblEnergyTransport.Location = new Point(15, 200);
-            lblEnergyTransport.Name = "lblEnergyTransport";
-            lblEnergyTransport.Size = new Size(140, 15);
-            lblEnergyTransport.TabIndex = 8;
-            lblEnergyTransport.Text = "Энергия/транспорт:";
-
-            // nudEnergyTransport
+            lblEnergyTransport.Text = "Энергия/транспорт (руб/шт):";
             nudEnergyTransport.Location = new Point(250, 197);
-            nudEnergyTransport.Name = "nudEnergyTransport";
             nudEnergyTransport.Size = new Size(150, 23);
-            nudEnergyTransport.TabIndex = 9;
-            nudEnergyTransport.Value = 0;
-            nudEnergyTransport.TextAlign = HorizontalAlignment.Right;
-            nudEnergyTransport.ThousandsSeparator = true;
-            nudEnergyTransport.Maximum = 1000000000;
             nudEnergyTransport.DecimalPlaces = 2;
+            nudEnergyTransport.ThousandsSeparator = true;
 
-            // lblPieceworkWage
             lblPieceworkWage.AutoSize = true;
             lblPieceworkWage.Location = new Point(15, 235);
-            lblPieceworkWage.Name = "lblPieceworkWage";
-            lblPieceworkWage.Size = new Size(125, 15);
-            lblPieceworkWage.TabIndex = 10;
-            lblPieceworkWage.Text = "Сдельная ЗП:";
-
-            // nudPieceworkWage
+            lblPieceworkWage.Text = "Сдельная ЗП (руб/шт):";
             nudPieceworkWage.Location = new Point(250, 232);
-            nudPieceworkWage.Name = "nudPieceworkWage";
             nudPieceworkWage.Size = new Size(150, 23);
-            nudPieceworkWage.TabIndex = 11;
-            nudPieceworkWage.Value = 0;
-            nudPieceworkWage.TextAlign = HorizontalAlignment.Right;
-            nudPieceworkWage.ThousandsSeparator = true;
-            nudPieceworkWage.Maximum = 1000000000;
             nudPieceworkWage.DecimalPlaces = 2;
+            nudPieceworkWage.ThousandsSeparator = true;
 
-            // lblFixedCostsGroup
             lblFixedCostsGroup.AutoSize = true;
             lblFixedCostsGroup.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblFixedCostsGroup.Location = new Point(15, 280);
-            lblFixedCostsGroup.Name = "lblFixedCostsGroup";
-            lblFixedCostsGroup.Size = new Size(225, 19);
-            lblFixedCostsGroup.TabIndex = 12;
             lblFixedCostsGroup.Text = "Постоянные затраты (месяц)";
 
-            // lblRent
             lblRent.AutoSize = true;
             lblRent.Location = new Point(15, 315);
-            lblRent.Name = "lblRent";
-            lblRent.Size = new Size(115, 15);
-            lblRent.TabIndex = 13;
             lblRent.Text = "Аренда помещения:";
-
-            // nudRent
             nudRent.Location = new Point(250, 312);
-            nudRent.Name = "nudRent";
             nudRent.Size = new Size(150, 23);
-            nudRent.TabIndex = 14;
-            nudRent.Value = 0;
-            nudRent.TextAlign = HorizontalAlignment.Right;
-            nudRent.ThousandsSeparator = true;
-            nudRent.Maximum = 1000000000;
             nudRent.DecimalPlaces = 2;
+            nudRent.ThousandsSeparator = true;
 
-            // lblDepreciation
             lblDepreciation.AutoSize = true;
             lblDepreciation.Location = new Point(15, 350);
-            lblDepreciation.Name = "lblDepreciation";
-            lblDepreciation.Size = new Size(175, 15);
-            lblDepreciation.TabIndex = 15;
             lblDepreciation.Text = "Амортизация оборудования:";
-
-            // nudDepreciation
             nudDepreciation.Location = new Point(250, 347);
-            nudDepreciation.Name = "nudDepreciation";
             nudDepreciation.Size = new Size(150, 23);
-            nudDepreciation.TabIndex = 16;
-            nudDepreciation.Value = 0;
-            nudDepreciation.TextAlign = HorizontalAlignment.Right;
-            nudDepreciation.ThousandsSeparator = true;
-            nudDepreciation.Maximum = 1000000000;
             nudDepreciation.DecimalPlaces = 2;
+            nudDepreciation.ThousandsSeparator = true;
 
-            // lblSalaryAdmin
             lblSalaryAdmin.AutoSize = true;
             lblSalaryAdmin.Location = new Point(15, 385);
-            lblSalaryAdmin.Name = "lblSalaryAdmin";
-            lblSalaryAdmin.Size = new Size(200, 15);
-            lblSalaryAdmin.TabIndex = 17;
             lblSalaryAdmin.Text = "Окладная часть ЗП (упр., охрана):";
-
-            // nudSalaryAdmin
             nudSalaryAdmin.Location = new Point(250, 382);
-            nudSalaryAdmin.Name = "nudSalaryAdmin";
             nudSalaryAdmin.Size = new Size(150, 23);
-            nudSalaryAdmin.TabIndex = 18;
-            nudSalaryAdmin.Value = 0;
-            nudSalaryAdmin.TextAlign = HorizontalAlignment.Right;
-            nudSalaryAdmin.ThousandsSeparator = true;
-            nudSalaryAdmin.Maximum = 1000000000;
             nudSalaryAdmin.DecimalPlaces = 2;
+            nudSalaryAdmin.ThousandsSeparator = true;
 
-            // lblUtilities
             lblUtilities.AutoSize = true;
             lblUtilities.Location = new Point(15, 420);
-            lblUtilities.Name = "lblUtilities";
-            lblUtilities.Size = new Size(165, 15);
-            lblUtilities.TabIndex = 19;
             lblUtilities.Text = "Коммунальные услуги:";
-
-            // nudUtilities
             nudUtilities.Location = new Point(250, 417);
-            nudUtilities.Name = "nudUtilities";
             nudUtilities.Size = new Size(150, 23);
-            nudUtilities.TabIndex = 20;
-            nudUtilities.Value = 0;
-            nudUtilities.TextAlign = HorizontalAlignment.Right;
-            nudUtilities.ThousandsSeparator = true;
-            nudUtilities.Maximum = 1000000000;
             nudUtilities.DecimalPlaces = 2;
+            nudUtilities.ThousandsSeparator = true;
 
-            // lblLoanInterest
             lblLoanInterest.AutoSize = true;
             lblLoanInterest.Location = new Point(15, 455);
-            lblLoanInterest.Name = "lblLoanInterest";
-            lblLoanInterest.Size = new Size(135, 15);
-            lblLoanInterest.TabIndex = 21;
             lblLoanInterest.Text = "Проценты по кредитам:";
-
-            // nudLoanInterest
             nudLoanInterest.Location = new Point(250, 452);
-            nudLoanInterest.Name = "nudLoanInterest";
             nudLoanInterest.Size = new Size(150, 23);
-            nudLoanInterest.TabIndex = 22;
-            nudLoanInterest.Value = 0;
-            nudLoanInterest.TextAlign = HorizontalAlignment.Right;
-            nudLoanInterest.ThousandsSeparator = true;
-            nudLoanInterest.Maximum = 1000000000;
             nudLoanInterest.DecimalPlaces = 2;
+            nudLoanInterest.ThousandsSeparator = true;
 
-            // lblTaxSettingsGroup
             lblTaxSettingsGroup.AutoSize = true;
             lblTaxSettingsGroup.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblTaxSettingsGroup.Location = new Point(15, 500);
-            lblTaxSettingsGroup.Name = "lblTaxSettingsGroup";
-            lblTaxSettingsGroup.Size = new Size(135, 19);
-            lblTaxSettingsGroup.TabIndex = 23;
             lblTaxSettingsGroup.Text = "Доп. настройки";
 
-            // lblSocialRate
             lblSocialRate.AutoSize = true;
             lblSocialRate.Location = new Point(15, 535);
-            lblSocialRate.Name = "lblSocialRate";
-            lblSocialRate.Size = new Size(210, 15);
-            lblSocialRate.TabIndex = 24;
             lblSocialRate.Text = "Ставка соц. отчислений (%):";
-
-            // nudSocialRate
             nudSocialRate.Location = new Point(250, 532);
-            nudSocialRate.Name = "nudSocialRate";
             nudSocialRate.Size = new Size(150, 23);
-            nudSocialRate.TabIndex = 25;
             nudSocialRate.Value = 38.5M;
-            nudSocialRate.TextAlign = HorizontalAlignment.Right;
-            nudSocialRate.ThousandsSeparator = true;
             nudSocialRate.Maximum = 100;
             nudSocialRate.DecimalPlaces = 1;
 
-            // lblProfitTaxRate
             lblProfitTaxRate.AutoSize = true;
             lblProfitTaxRate.Location = new Point(15, 570);
-            lblProfitTaxRate.Name = "lblProfitTaxRate";
-            lblProfitTaxRate.Size = new Size(165, 15);
-            lblProfitTaxRate.TabIndex = 26;
             lblProfitTaxRate.Text = "Налог на прибыль (%):";
-
-            // nudProfitTaxRate
             nudProfitTaxRate.Location = new Point(250, 567);
-            nudProfitTaxRate.Name = "nudProfitTaxRate";
             nudProfitTaxRate.Size = new Size(150, 23);
-            nudProfitTaxRate.TabIndex = 27;
             nudProfitTaxRate.Value = 20;
-            nudProfitTaxRate.TextAlign = HorizontalAlignment.Right;
-            nudProfitTaxRate.ThousandsSeparator = true;
             nudProfitTaxRate.Maximum = 100;
             nudProfitTaxRate.DecimalPlaces = 1;
 
-            // btnSaveData
             btnSaveData.Location = new Point(15, 610);
-            btnSaveData.Name = "btnSaveData";
             btnSaveData.Size = new Size(150, 30);
-            btnSaveData.TabIndex = 28;
             btnSaveData.Text = "Сохранить данные";
-            btnSaveData.UseVisualStyleBackColor = true;
             btnSaveData.Click += BtnSaveData_Click;
 
-            // btnCalculate
             btnCalculate.Location = new Point(180, 610);
-            btnCalculate.Name = "btnCalculate";
             btnCalculate.Size = new Size(150, 30);
-            btnCalculate.TabIndex = 29;
             btnCalculate.Text = "Рассчитать";
-            btnCalculate.UseVisualStyleBackColor = true;
             btnCalculate.Click += BtnCalculate_Click;
 
-            // MainForm
+            // MainForm Properties
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 650);
             Controls.Add(tabControl1);
             Name = "MainForm";
-            Text = "Обучающий калькулятор по расчёту издержек и прибыли";
+            Text = "Калькулятор издержек и прибыли";
+
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
+            tabPage2.ResumeLayout(false);
+            groupBoxAccountingCosts.ResumeLayout(false);
+            groupBoxAccountingCosts.PerformLayout();
+            groupBoxInternalCosts.ResumeLayout(false);
+            groupBoxInternalCosts.PerformLayout();
+            groupBoxByVolume.ResumeLayout(false);
+            groupBoxByVolume.PerformLayout();
             tabControl1.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -479,5 +495,29 @@
 
         private Button btnSaveData;
         private Button btnCalculate;
+
+        // Tab 2 Controls
+        private GroupBox groupBoxAccountingCosts;
+        private Label lblAccountingTitle;
+        private Label lblAccountingCostsFormula;
+        private Label lblAccountingCostsValue;
+        private Button btnInfoAccounting;
+
+        private GroupBox groupBoxInternalCosts;
+        private Label lblInternalTitle;
+        private Label lblInternalCostsFormula;
+        private Label lblInternalCostsValue;
+        private Button btnInfoInternal;
+
+        private GroupBox groupBoxByVolume;
+
+        private Label lblFCTitle, lblFCFormula, lblFCValue; private Button btnInfoFC;
+        private Label lblVCTitle, lblVCFormula, lblVCValue; private Button btnInfoVC;
+        private Label lblTCTitle, lblTCFormula, lblTCValue; private Button btnInfoTC;
+
+        private Label lblAFCTitle, lblAFCFormula, lblAFCValue; private Button btnInfoAFC;
+        private Label lblAVCTitle, lblAVCFormula, lblAVCValue; private Button btnInfoAVC;
+        private Label lblATCTitle, lblATCFormula, lblATCValue; private Button btnInfoATC;
+        private Label lblMCTitle, lblMCFormula, lblMCValue; private Button btnInfoMC;
     }
 }
