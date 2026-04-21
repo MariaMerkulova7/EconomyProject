@@ -406,7 +406,7 @@ namespace EduCostCalc
                 {
                     Text = $"BEP: {(int)bepQ} шт.",
                     X = (double)bepQ,
-                    Y = (double)(bepValue * 1.1),
+                    Y = (double)(bepValue * 1.1m),
                     Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                     ForeColor = Color.DarkOrange
                 });
@@ -447,7 +447,7 @@ namespace EduCostCalc
         }
 
         // ЕДИНСТВЕННАЯ версия SetupChart (старую удалить!)
-        private void SetupChart(Chart chart, string title, string xAxis, string yAxis)
+        private static void SetupChart(Chart chart, string title, string xAxis, string yAxis)
         {
             chart.Titles.Clear();
             chart.Titles.Add(new Title(title, Docking.Top, new Font("Segoe UI", 11F, FontStyle.Bold), Color.Black));

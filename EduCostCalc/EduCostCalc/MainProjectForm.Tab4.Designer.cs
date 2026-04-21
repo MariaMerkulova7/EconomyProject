@@ -84,41 +84,5 @@ namespace EduCostCalc
             // === Добавление на вкладку ===
             tabPage4.Controls.AddRange(new Control[] { panelControls, chartCostCurves, chartProfitCurves });
         }
-
-        private void SetupChart(Chart chart, string title, string xAxis, string yAxis)
-        {
-            chart.Titles.Clear();
-            chart.Titles.Add(new Title(title, Docking.Top, new Font("Segoe UI", 11F, FontStyle.Bold), Color.Black));
-
-            chart.ChartAreas.Clear();
-            var area = new ChartArea
-            {
-                AxisX = { Title = xAxis, TitleFont = new Font("Segoe UI", 9F), LabelStyle = { Font = new Font("Segoe UI", 8F) } },
-                AxisY = { Title = yAxis, TitleFont = new Font("Segoe UI", 9F), LabelStyle = { Font = new Font("Segoe UI", 8F), Format = "N0" } },
-                CursorX = { IsUserSelectionEnabled = true, SelectionColor = Color.LightBlue },
-                CursorY = { IsUserSelectionEnabled = true },
-                AxisX = { IsMarginVisible = false },
-                BackColor = Color.White,
-                BorderColor = Color.LightGray,
-                BorderWidth = 1
-            };
-            area.AxisX.MajorGrid.LineColor = Color.LightGray;
-            area.AxisY.MajorGrid.LineColor = Color.LightGray;
-            chart.ChartAreas.Add(area);
-
-            chart.Legends.Clear();
-            var legend = new Legend
-            {
-                Docking = Docking.Right,
-                Font = new Font("Segoe UI", 8F),
-                BorderColor = Color.LightGray,
-                BorderWidth = 1
-            };
-            chart.Legends.Add(legend);
-
-            chart.Series.Clear();
-            chart.ChartType = SeriesChartType.Line;
-            chart.AntiAliasing = AntiAliasing.All;
-        }
     }
 }
