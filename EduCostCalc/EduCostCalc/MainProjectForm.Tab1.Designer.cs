@@ -10,7 +10,7 @@
         private NumericUpDown nudRent, nudDepreciation, nudSalaryAdmin, nudUtilities, nudLoanInterest;
         private Label lblTaxSettingsGroup, lblSocialRate, lblProfitTaxRate;
         private NumericUpDown nudSocialRate, nudProfitTaxRate;
-        private Button btnSaveData, btnCalculate;
+        private Button btnCalculate, btnClearData;
 
         private void InitializeTab1()
         {
@@ -63,11 +63,19 @@
             lblProfitTaxRate = new Label() { AutoSize = true, Location = new Point(15, 570), Text = "Налог на прибыль (%): " };
             nudProfitTaxRate = new NumericUpDown() { Location = new Point(250, 567), Size = new Size(150, 23), Value = 20, Maximum = 100, DecimalPlaces = 1 };
 
-            btnSaveData = new Button() { Location = new Point(15, 610), Size = new Size(150, 30), Text = "Сохранить данные" };
-            btnSaveData.Click += BtnSaveData_Click;
-
-            btnCalculate = new Button() { Location = new Point(180, 610), Size = new Size(150, 30), Text = "Рассчитать" };
+            btnCalculate = new Button() { Location = new Point(15, 610), Size = new Size(150, 30), Text = "Рассчитать " };
+            btnCalculate.Font = new Font("Segoe UI", 9F, FontStyle.Bold); btnCalculate.BackColor = Color.LightGreen;
             btnCalculate.Click += BtnCalculate_Click;
+
+            btnClearData = new Button()
+            {
+                Location = new Point(180, 610),
+                Size = new Size(150, 30),
+                Text = "Очистить",
+                BackColor = Color.LightCoral,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnClearData.Click += BtnClearTab1_Click;
 
             // Добавление на вкладку
             tabPage1.Controls.AddRange(new Control[] {
@@ -76,7 +84,7 @@
                 lblPieceworkWage, nudPieceworkWage, lblFixedCostsGroup, lblRent, nudRent, lblDepreciation,
                 nudDepreciation, lblSalaryAdmin, nudSalaryAdmin, lblUtilities, nudUtilities, lblLoanInterest,
                 nudLoanInterest, lblTaxSettingsGroup, lblSocialRate, nudSocialRate, lblProfitTaxRate,
-                nudProfitTaxRate, btnSaveData, btnCalculate
+                nudProfitTaxRate, btnCalculate, btnClearData
             });
         }
     }

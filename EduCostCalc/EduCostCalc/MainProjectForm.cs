@@ -231,34 +231,6 @@ namespace EduCostCalc
         }
 
         // ================= TAB 1: INPUT & SAVE =================
-
-
-        private void BtnSaveData_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (nudOutputVolume.Value <= 0)
-                {
-                    MessageBox.Show("Объем выпуска должен быть больше 0!", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    nudOutputVolume.Focus();
-                    return;
-                }
-                if (nudPricePerUnit.Value <= 0)
-                {
-                    MessageBox.Show("Цена реализации должна быть больше 0!", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    nudPricePerUnit.Focus();
-                    return;
-                }
-
-                SaveFormDataToCompany();
-                MessageBox.Show("Данные успешно сохранены!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void BtnCalculate_Click(object sender, EventArgs e)
         {
             try
@@ -511,6 +483,61 @@ namespace EduCostCalc
             {
                 MessageBox.Show($"Ошибка при отрисовке графиков: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // ==================================================
+        private void BtnClearTab1_Click(object sender, EventArgs e)
+        {
+            var confirm = MessageBox.Show(
+                "Вы уверены, что хотите сбросить все данные на вкладке 1?\nРезультаты на вкладках 2 и 3 также будут очищены.",
+                "Подтверждение очистки",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                // 1. Сброс базовых параметров
+                nudOutputVolume.Value = 0;
+                nudPricePerUnit.Value = 0;
+
+                // 2. Сброс переменных затрат
+                nudRawMaterials.Value = 0;
+                nudEnergyTransport.Value = 0;
+                nudPieceworkWage.Value = 0;
+
+                // 3. Сброс постоянных затрат
+                nudRent.Value = 0;
+                nudDepreciation.Value = 0;
+                nudSalaryAdmin.Value = 0;
+                nudUtilities.Value = 0;
+                nudLoanInterest.Value = 0;
+
+                // 4. Сброс налоговых ставок к значениям по умолчанию
+                nudSocialRate.Value = 38.5M;
+                nudProfitTaxRate.Value = 20.0M;
+
+                // 5. Очистка результатов на вкладке 2
+                lblAccountingCostsValue.Text = "0 руб.";
+                lblInternalCostsValue.Text = "0 руб. (опционально)";
+                lblFCValue.Text = "0 руб."; lblVCValue.Text = "0 руб."; lblTCValue.Text = "0 руб.";
+                lblAFCValue.Text = "0 руб./шт."; lblAVCValue.Text = "0 руб./шт.";
+                lblATCValue.Text = "0 руб./шт."; lblMCValue.Text = "0 руб./шт.";
+
+                // 6. Очистка результатов на вкладке 3
+                foreach (Control ctrl in tabPage3.Controls)
+                {
+                    if (ctrl is Label lbl && lbl.Name.StartsWith("valRes"))
+                        lbl.Text = "0 руб.";
+                }
+
+                MessageBox.Show("Все поля успешно очищены.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при очистке: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

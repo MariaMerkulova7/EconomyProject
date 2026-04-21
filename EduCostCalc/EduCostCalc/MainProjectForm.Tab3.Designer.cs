@@ -154,6 +154,8 @@ namespace EduCostCalc
             btnCalculateDetailed.Click += BtnCalculateDetailed_Click;
 
             btnClearTab3.Size = new Size(120, 35); btnClearTab3.Text = "Очистить";
+            btnClearTab3.Font = new Font("Segoe UI", 9F, FontStyle.Bold); btnClearTab3.BackColor = Color.LightCoral;
+
             btnClearTab3.Click += BtnClearTab3_Click;
 
             btnInfoCostStructure.Size = new Size(110, 35); btnInfoCostStructure.Text = "Теория";
