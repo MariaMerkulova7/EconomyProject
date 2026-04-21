@@ -1,9 +1,9 @@
 using EduCostCalc.Models;
 using EduCostCalc.Services;
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace EduCostCalc
 {
@@ -12,6 +12,7 @@ namespace EduCostCalc
         private readonly Company _currentCompany;
         private readonly CostCalculator _calculator;
         private readonly DetailedCostCalculator _detailedCalculator;
+        
 
         public MainForm()
         {
@@ -22,6 +23,8 @@ namespace EduCostCalc
         }
 
         // ================= TAB 1: INPUT & SAVE =================
+
+
         private void BtnSaveData_Click(object sender, EventArgs e)
         {
             try
@@ -61,6 +64,7 @@ namespace EduCostCalc
                 SaveFormDataToCompany();
                 UpdateCostsTab();
                 tabControl1.SelectedIndex = 1;
+
             }
             catch (Exception ex)
             {
@@ -107,7 +111,7 @@ namespace EduCostCalc
                 lblAFCValue.Text = $"{_calculator.CalculateAverageFixedCost():N2} руб./шт.";
                 lblAVCValue.Text = $"{_calculator.CalculateAverageVariableCost():N2} руб./шт.";
                 lblATCValue.Text = $"{_calculator.CalculateAverageTotalCost():N2} руб./шт.";
-                lblMCValue.Text = $"{_calculator.CalculateAverageVariableCost():N2} руб./шт."; // MC ≈ AVC в линейной модели
+                lblMCValue.Text = $"{_calculator.CalculateAverageVariableCost():N2} руб./шт.";
             }
             catch (Exception ex)
             {
@@ -138,20 +142,16 @@ namespace EduCostCalc
 
         private void SaveDetailedFormData()
         {
-            // Синхронизация базовых параметров
             _currentCompany.Production.OutputVolume = nudOutputVolume3.Value;
             _currentCompany.Production.PricePerUnit = nudPricePerUnit3.Value;
 
-            // Прямые затраты
             _currentCompany.DirectCosts.RawMaterialsPerUnit = nudRawMaterialsDirect.Value;
             _currentCompany.DirectCosts.MainLaborWagePerUnit = nudMainLaborWage.Value;
 
-            // Общепроизводственные
             _currentCompany.ProductionOverhead.AuxiliaryLaborWage = nudAuxiliaryLaborWage.Value;
             _currentCompany.ProductionOverhead.TechnologicalEnergyWater = nudTechnologicalEnergy.Value;
             _currentCompany.ProductionOverhead.OtherProductionOverheadPercent = nudOtherProdOverheadPerc.Value;
 
-            // Общезаводские/Административные
             _currentCompany.AdministrativeCosts.AdministrativeStaffWage = nudAdminStaffWage.Value;
             _currentCompany.AdministrativeCosts.Rent = nudRentAdmin.Value;
             _currentCompany.AdministrativeCosts.Heating = nudHeating.Value;
@@ -160,17 +160,14 @@ namespace EduCostCalc
             _currentCompany.AdministrativeCosts.OfficeSupplies = nudOfficeSupplies.Value;
             _currentCompany.AdministrativeCosts.OtherAdministrativePercent = nudOtherAdminPerc.Value;
 
-            // Эксплуатационные
             _currentCompany.OperatingCosts.Depreciation = nudDepreciationCost.Value;
             _currentCompany.OperatingCosts.LeasePayments = nudLeasePayments.Value;
             _currentCompany.OperatingCosts.LoanInterest = nudLoanInterestCost.Value;
             _currentCompany.OperatingCosts.TaxesIncludedInCost = nudTaxesInCost.Value;
 
-            // Коммерческие
             _currentCompany.CommercialCosts.SalesStaffWage = nudSalesStaffWage.Value;
             _currentCompany.CommercialCosts.OtherCommercialPercent = nudOtherCommPerc.Value;
 
-            // Внутренние (неявные)
             _currentCompany.ImplicitCosts.OpportunityCostCapital = nudOpportunityCapital.Value;
             _currentCompany.ImplicitCosts.OpportunityCostOwnerLabor = nudOpportunityLabor.Value;
             _currentCompany.ImplicitCosts.OpportunityCostRent = nudOpportunityRent.Value;
@@ -179,7 +176,6 @@ namespace EduCostCalc
 
         private void UpdateTab3Results()
         {
-            // Структура себестоимости
             valResDirect.Text = $"{_detailedCalculator.CalculateDirectCosts():N2} руб.";
             valResProdOverhead.Text = $"{_currentCompany.ProductionOverhead.TotalProductionOverhead:N2} руб.";
             valResAdmin.Text = $"{_currentCompany.AdministrativeCosts.TotalAdministrativeCosts:N2} руб.";
@@ -189,20 +185,17 @@ namespace EduCostCalc
             valResFullCost.Text = $"{_detailedCalculator.CalculateFullCost():N2} руб.";
             valResCostPerUnit.Text = $"{_detailedCalculator.CalculateCostPerUnit():N2} руб./шт.";
 
-            // Прибыль
             valResRevenue.Text = $"{_detailedCalculator.CalculateRevenue():N2} руб.";
             valResGrossProfit.Text = $"{_detailedCalculator.CalculateGrossProfit():N2} руб.";
             valResOperatingProfit.Text = $"{_detailedCalculator.CalculateOperatingProfit():N2} руб.";
             valResNetProfit.Text = $"{_detailedCalculator.CalculateNetProfit():N2} руб.";
             valResEconomicProfit.Text = $"{_detailedCalculator.CalculateEconomicProfit():N2} руб.";
 
-            // Эффективность
             valResCM.Text = $"{_detailedCalculator.CalculateContributionMargin():N2} руб.";
             valResCMRatio.Text = $"{_detailedCalculator.CalculateContributionMarginRatio():N2}%";
             valResProfitability.Text = $"{_detailedCalculator.CalculateProfitabilityFullCost():N2}%";
             valResROS.Text = $"{_detailedCalculator.CalculateReturnOnSales():N2}%";
 
-            // Точка безубыточности
             var bepUnits = _detailedCalculator.CalculateBreakEvenPointUnits();
             var bepValue = _detailedCalculator.CalculateBreakEvenPointValue();
 
@@ -223,7 +216,6 @@ namespace EduCostCalc
 
         private void BtnClearTab3_Click(object sender, EventArgs e)
         {
-            // Сброс полей ввода на 0 или значения по умолчанию
             nudOutputVolume3.Value = 0; nudPricePerUnit3.Value = 0;
             nudRawMaterialsDirect.Value = 0; nudMainLaborWage.Value = 0;
             nudAuxiliaryLaborWage.Value = 0; nudTechnologicalEnergy.Value = 0; nudOtherProdOverheadPerc.Value = 13;
@@ -233,7 +225,6 @@ namespace EduCostCalc
             nudSalesStaffWage.Value = 0; nudOtherCommPerc.Value = 13;
             nudOpportunityCapital.Value = 0; nudOpportunityLabor.Value = 0; nudOpportunityRent.Value = 0; nudNormalProfit.Value = 0;
 
-            // Сброс результатов
             foreach (Control ctrl in tabPage3.Controls)
             {
                 if (ctrl is Label lbl && lbl.Name.StartsWith("valRes"))
@@ -307,189 +298,12 @@ namespace EduCostCalc
                 else if (tabControl1.SelectedIndex == 2)
                     SaveDetailedFormData();
 
-                DrawCharts();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при отрисовке графиков: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void DrawCharts()
-        {
-            var selectedType = cboChartType.SelectedItem?.ToString();
-            chartCostCurves.Series.Clear();
-            chartProfitCurves.Series.Clear();
-
-            var maxQ = Math.Max((int)_currentCompany.Production.OutputVolume, 100);
-            var step = maxQ > 1000 ? 50 : 10;
-            var volumes = Enumerable.Range(0, (maxQ / step) + 1)
-                .Select(i => (decimal)(i * step)).ToArray();
-
-            switch (selectedType)
-            {
-                case "Кривые издержек (краткосрочный период)":
-                    DrawCostCurves(volumes);
-                    DrawProfitCurves(volumes);
-                    break;
-                case "Выручка и прибыль":
-                    DrawRevenueProfitCurves(volumes);
-                    break;
-                case "Точка безубыточности":
-                    DrawBreakEvenChart(volumes);
-                    break;
-                default:
-                    DrawCostCurves(volumes);
-                    DrawProfitCurves(volumes);
-                    break;
-            }
-        }
-
-        private void DrawCostCurves(decimal[] volumes)
-        {
-            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
-            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
-
-            AddSeries(chartCostCurves, "FC", volumes, volumes.Select(_ => fc).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
-            AddSeries(chartCostCurves, "VC", volumes, volumes.Select(q => avc * q).ToArray(), Color.Blue, 2, ChartDashStyle.Solid);
-            AddSeries(chartCostCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
-
-            var atcValues = volumes.Select(q => q > 0 ? (fc / q + avc) : 0).ToArray();
-            var avcValues = volumes.Select(_ => avc).ToArray();
-
-            AddSeries(chartCostCurves, "ATC", volumes, atcValues, Color.Purple, 2, ChartDashStyle.Dash);
-            AddSeries(chartCostCurves, "AVC", volumes, avcValues, Color.Orange, 2, ChartDashStyle.Dash);
-        }
-
-        private void DrawProfitCurves(decimal[] volumes)
-        {
-            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
-            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
-            var price = _currentCompany.Production.PricePerUnit;
-
-            AddSeries(chartProfitCurves, "TR (Выручка)", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
-            AddSeries(chartProfitCurves, "TC (Издержки)", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
-            AddSeries(chartProfitCurves, "Прибыль", volumes, volumes.Select(q => (price - avc) * q - fc).ToArray(), Color.DarkBlue, 3, ChartDashStyle.Dot);
-
-            // Исправлено: вынесено в static readonly или просто исправлен тип литерала
-            AddSeries(chartProfitCurves, "Нулевая прибыль",
-                new[] { volumes[0], volumes[^1] },
-                new[] { 0m, 0m },
-                Color.Gray, 1, ChartDashStyle.Dash);
-        }
-
-        private void DrawBreakEvenChart(decimal[] volumes)
-        {
-            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
-            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
-            var price = _currentCompany.Production.PricePerUnit;
-
-            AddSeries(chartCostCurves, "TR", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
-            AddSeries(chartCostCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
-
-            if (price > avc)
-            {
-                var bepQ = fc / (price - avc);
-                var bepValue = price * bepQ;
-
-                // Исправлено: 0.1m вместо 0.1 (decimal * decimal)
-                var maxVal = bepValue + fc * 0.1m;
-
-                AddSeries(chartCostCurves, "BEP",
-                    new[] { bepQ, bepQ },
-                    new[] { 0m, maxVal },
-                    Color.DarkOrange, 2, ChartDashStyle.DashDot);
-
-                chartCostCurves.Annotations.Clear();
-                chartCostCurves.Annotations.Add(new TextAnnotation
-                {
-                    Text = $"BEP: {(int)bepQ} шт.",
-                    X = (double)bepQ,
-                    Y = (double)(bepValue * 1.1m),
-                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                    ForeColor = Color.DarkOrange
-                });
-            }
-        }
-
-        private void DrawRevenueProfitCurves(decimal[] volumes)
-        {
-            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
-            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
-            var price = _currentCompany.Production.PricePerUnit;
-
-            AddSeries(chartProfitCurves, "TR", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
-            AddSeries(chartProfitCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
-
-            var profitValues = volumes.Select(q => (price - avc) * q - fc).ToArray();
-            AddSeries(chartProfitCurves, "Прибыль", volumes, profitValues, Color.DarkBlue, 3, ChartDashStyle.Solid);
-        }
-
-        // Помечен как static для удовлетворения анализатора кода
-        private static void AddSeries(Chart chart, string name, decimal[] x, decimal[] y, Color color, int width = 2, ChartDashStyle dashStyle = ChartDashStyle.Solid)
-        {
-            var series = new Series(name)
-            {
-                ChartType = SeriesChartType.Line,
-                Color = color,
-                BorderWidth = width,
-                BorderDashStyle = dashStyle,
-                XValueType = ChartValueType.Double,
-                YValueType = ChartValueType.Double,
-                IsVisibleInLegend = true
-            };
-
-            for (int i = 0; i < x.Length; i++)
-                series.Points.AddXY((double)x[i], (double)y[i]);
-
-            chart.Series.Add(series);
-        }
-
-        // ЕДИНСТВЕННАЯ версия SetupChart (старую удалить!)
-        private static void SetupChart(Chart chart, string title, string xAxis, string yAxis)
-        {
-            chart.Titles.Clear();
-            chart.Titles.Add(new Title(title, Docking.Top, new Font("Segoe UI", 11F, FontStyle.Bold), Color.Black));
-
-            chart.ChartAreas.Clear();
-            var area = new ChartArea
-            {
-                // Исправлено: IsMarginVisible перенесён в AxisX, убрана дублирующая инициализация
-                AxisX = {
-            Title = xAxis,
-            TitleFont = new Font("Segoe UI", 9F),
-            LabelStyle = { Font = new Font("Segoe UI", 8F) },
-            IsMarginVisible = false
-        },
-                AxisY = {
-            Title = yAxis,
-            TitleFont = new Font("Segoe UI", 9F),
-            LabelStyle = { Font = new Font("Segoe UI", 8F), Format = "N0" }
-        },
-                CursorX = { IsUserSelectionEnabled = true, SelectionColor = Color.LightBlue },
-                CursorY = { IsUserSelectionEnabled = true },
-                BackColor = Color.White,
-                BorderColor = Color.LightGray,
-                BorderWidth = 1
-            };
-            area.AxisX.MajorGrid.LineColor = Color.LightGray;
-            area.AxisY.MajorGrid.LineColor = Color.LightGray;
-            chart.ChartAreas.Add(area);
-
-            chart.Legends.Clear();
-            var legend = new Legend
-            {
-                Docking = Docking.Right,
-                Font = new Font("Segoe UI", 8F),
-                BorderColor = Color.LightGray,
-                BorderWidth = 1
-            };
-            chart.Legends.Add(legend);
-
-            chart.Series.Clear();
-            // Исправлено: AntiAliasingStyles.All вместо несуществующего AntiAliasing
-            chart.AntiAliasing = AntiAliasingStyles.All;
-        }
+        } 
     }
 }

@@ -13,7 +13,6 @@
             base.Dispose(disposing);
         }
 
-        // Элементы управления навигацией
         private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
@@ -28,28 +27,20 @@
             tabPage3 = new TabPage();
             tabPage4 = new TabPage();
 
-            // Приостановка компоновки
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
             tabPage3.SuspendLayout();
+            tabPage4.SuspendLayout();
             SuspendLayout();
 
             // Инициализация содержимого вкладок
             InitializeTab1();
             InitializeTab2();
             InitializeTab3();
+            InitializeTab4(); 
 
-            // === TAB 4: GRAPHS (Placeholder) ===
-            tabPage4.Location = new Point(4, 24);
-            tabPage4.Name = "tabPage4";
-            tabPage4.Padding = new Padding(3);
-            tabPage4.Size = new Size(1016, 622);
-            tabPage4.TabIndex = 3;
-            tabPage4.Text = "4. Графики";
-            tabPage4.UseVisualStyleBackColor = true;
-
-            // === MAIN FORM & TAB CONTROL SETUP ===
+            // Настройка TabControl
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
@@ -61,6 +52,7 @@
             tabControl1.Size = new Size(1024, 650);
             tabControl1.TabIndex = 0;
 
+            // Настройка формы
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 650);
@@ -68,13 +60,14 @@
             Name = "MainForm";
             Text = "Калькулятор издержек и прибыли";
 
-            // Возобновление компоновки
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
             tabPage2.ResumeLayout(false);
             tabPage2.PerformLayout();
             tabPage3.ResumeLayout(false);
             tabPage3.PerformLayout();
+            tabPage4.ResumeLayout(false);
+            tabPage4.PerformLayout();
             tabControl1.ResumeLayout(false);
             ResumeLayout(false);
         }
