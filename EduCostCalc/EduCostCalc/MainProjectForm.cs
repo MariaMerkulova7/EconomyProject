@@ -1,7 +1,9 @@
 using EduCostCalc.Models;
 using EduCostCalc.Services;
 using System;
+using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace EduCostCalc
 {
@@ -293,5 +295,201 @@ namespace EduCostCalc
             "= ПРОИЗВОДСТВЕННАЯ СЕБЕСТОИМОСТЬ\n" +
             "5️⃣ КОММЕРЧЕСКИЕ: ЗП сбыта + соц. отчисления, прочие (~13%)\n" +
             "= ПОЛНАЯ СЕБЕСТОИМОСТЬ");
+
+        // ================= TAB 4: CHARTS =================
+
+        private void BtnRefreshCharts_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tabControl1.SelectedIndex == 0)
+                    SaveFormDataToCompany();
+                else if (tabControl1.SelectedIndex == 2)
+                    SaveDetailedFormData();
+
+                DrawCharts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при отрисовке графиков: {ex.Message}", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void DrawCharts()
+        {
+            var selectedType = cboChartType.SelectedItem?.ToString();
+            chartCostCurves.Series.Clear();
+            chartProfitCurves.Series.Clear();
+
+            var maxQ = Math.Max((int)_currentCompany.Production.OutputVolume, 100);
+            var step = maxQ > 1000 ? 50 : 10;
+            var volumes = Enumerable.Range(0, (maxQ / step) + 1)
+                .Select(i => (decimal)(i * step)).ToArray();
+
+            switch (selectedType)
+            {
+                case "Кривые издержек (краткосрочный период)":
+                    DrawCostCurves(volumes);
+                    DrawProfitCurves(volumes);
+                    break;
+                case "Выручка и прибыль":
+                    DrawRevenueProfitCurves(volumes);
+                    break;
+                case "Точка безубыточности":
+                    DrawBreakEvenChart(volumes);
+                    break;
+                default:
+                    DrawCostCurves(volumes);
+                    DrawProfitCurves(volumes);
+                    break;
+            }
+        }
+
+        private void DrawCostCurves(decimal[] volumes)
+        {
+            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
+            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
+
+            AddSeries(chartCostCurves, "FC", volumes, volumes.Select(_ => fc).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
+            AddSeries(chartCostCurves, "VC", volumes, volumes.Select(q => avc * q).ToArray(), Color.Blue, 2, ChartDashStyle.Solid);
+            AddSeries(chartCostCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
+
+            var atcValues = volumes.Select(q => q > 0 ? (fc / q + avc) : 0).ToArray();
+            var avcValues = volumes.Select(_ => avc).ToArray();
+
+            AddSeries(chartCostCurves, "ATC", volumes, atcValues, Color.Purple, 2, ChartDashStyle.Dash);
+            AddSeries(chartCostCurves, "AVC", volumes, avcValues, Color.Orange, 2, ChartDashStyle.Dash);
+        }
+
+        private void DrawProfitCurves(decimal[] volumes)
+        {
+            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
+            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
+            var price = _currentCompany.Production.PricePerUnit;
+
+            AddSeries(chartProfitCurves, "TR (Выручка)", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
+            AddSeries(chartProfitCurves, "TC (Издержки)", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
+            AddSeries(chartProfitCurves, "Прибыль", volumes, volumes.Select(q => (price - avc) * q - fc).ToArray(), Color.DarkBlue, 3, ChartDashStyle.Dot);
+
+            // Исправлено: вынесено в static readonly или просто исправлен тип литерала
+            AddSeries(chartProfitCurves, "Нулевая прибыль",
+                new[] { volumes[0], volumes[^1] },
+                new[] { 0m, 0m },
+                Color.Gray, 1, ChartDashStyle.Dash);
+        }
+
+        private void DrawBreakEvenChart(decimal[] volumes)
+        {
+            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
+            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
+            var price = _currentCompany.Production.PricePerUnit;
+
+            AddSeries(chartCostCurves, "TR", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
+            AddSeries(chartCostCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
+
+            if (price > avc)
+            {
+                var bepQ = fc / (price - avc);
+                var bepValue = price * bepQ;
+
+                // Исправлено: 0.1m вместо 0.1 (decimal * decimal)
+                var maxVal = bepValue + fc * 0.1m;
+
+                AddSeries(chartCostCurves, "BEP",
+                    new[] { bepQ, bepQ },
+                    new[] { 0m, maxVal },
+                    Color.DarkOrange, 2, ChartDashStyle.DashDot);
+
+                chartCostCurves.Annotations.Clear();
+                chartCostCurves.Annotations.Add(new TextAnnotation
+                {
+                    Text = $"BEP: {(int)bepQ} шт.",
+                    X = (double)bepQ,
+                    Y = (double)(bepValue * 1.1),
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                    ForeColor = Color.DarkOrange
+                });
+            }
+        }
+
+        private void DrawRevenueProfitCurves(decimal[] volumes)
+        {
+            var fc = _currentCompany.FixedCosts.TotalFixedCosts;
+            var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
+            var price = _currentCompany.Production.PricePerUnit;
+
+            AddSeries(chartProfitCurves, "TR", volumes, volumes.Select(q => price * q).ToArray(), Color.Green, 3, ChartDashStyle.Solid);
+            AddSeries(chartProfitCurves, "TC", volumes, volumes.Select(q => fc + avc * q).ToArray(), Color.Red, 2, ChartDashStyle.Solid);
+
+            var profitValues = volumes.Select(q => (price - avc) * q - fc).ToArray();
+            AddSeries(chartProfitCurves, "Прибыль", volumes, profitValues, Color.DarkBlue, 3, ChartDashStyle.Solid);
+        }
+
+        // Помечен как static для удовлетворения анализатора кода
+        private static void AddSeries(Chart chart, string name, decimal[] x, decimal[] y, Color color, int width = 2, ChartDashStyle dashStyle = ChartDashStyle.Solid)
+        {
+            var series = new Series(name)
+            {
+                ChartType = SeriesChartType.Line,
+                Color = color,
+                BorderWidth = width,
+                BorderDashStyle = dashStyle,
+                XValueType = ChartValueType.Double,
+                YValueType = ChartValueType.Double,
+                IsVisibleInLegend = true
+            };
+
+            for (int i = 0; i < x.Length; i++)
+                series.Points.AddXY((double)x[i], (double)y[i]);
+
+            chart.Series.Add(series);
+        }
+
+        // ЕДИНСТВЕННАЯ версия SetupChart (старую удалить!)
+        private void SetupChart(Chart chart, string title, string xAxis, string yAxis)
+        {
+            chart.Titles.Clear();
+            chart.Titles.Add(new Title(title, Docking.Top, new Font("Segoe UI", 11F, FontStyle.Bold), Color.Black));
+
+            chart.ChartAreas.Clear();
+            var area = new ChartArea
+            {
+                // Исправлено: IsMarginVisible перенесён в AxisX, убрана дублирующая инициализация
+                AxisX = {
+            Title = xAxis,
+            TitleFont = new Font("Segoe UI", 9F),
+            LabelStyle = { Font = new Font("Segoe UI", 8F) },
+            IsMarginVisible = false
+        },
+                AxisY = {
+            Title = yAxis,
+            TitleFont = new Font("Segoe UI", 9F),
+            LabelStyle = { Font = new Font("Segoe UI", 8F), Format = "N0" }
+        },
+                CursorX = { IsUserSelectionEnabled = true, SelectionColor = Color.LightBlue },
+                CursorY = { IsUserSelectionEnabled = true },
+                BackColor = Color.White,
+                BorderColor = Color.LightGray,
+                BorderWidth = 1
+            };
+            area.AxisX.MajorGrid.LineColor = Color.LightGray;
+            area.AxisY.MajorGrid.LineColor = Color.LightGray;
+            chart.ChartAreas.Add(area);
+
+            chart.Legends.Clear();
+            var legend = new Legend
+            {
+                Docking = Docking.Right,
+                Font = new Font("Segoe UI", 8F),
+                BorderColor = Color.LightGray,
+                BorderWidth = 1
+            };
+            chart.Legends.Add(legend);
+
+            chart.Series.Clear();
+            // Исправлено: AntiAliasingStyles.All вместо несуществующего AntiAliasing
+            chart.AntiAliasing = AntiAliasingStyles.All;
+        }
     }
 }
