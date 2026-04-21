@@ -4,6 +4,9 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace EduCostCalc
 {
@@ -304,6 +307,86 @@ namespace EduCostCalc
                 MessageBox.Show($"Ошибка при отрисовке графиков: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        } 
+        }
+
+        private void BtnExportCsv_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Синхронизируем данные из полей в модель (гарантируем актуальность)
+                SaveFormDataToCompany();
+                SaveDetailedFormData();
+
+                using (var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "CSV файлы|*.csv|Все файлы|*.*",
+                    FileName = $"EduCostCalc_Export_{DateTime.Now:yyyyMMdd_HHmm}.csv",
+                    DefaultExt = "csv"
+                })
+                {
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var csvContent = GenerateCsvContent();
+                        // UTF8 с BOM для корректного открытия кириллицы в Excel
+                        File.WriteAllText(saveFileDialog.FileName, csvContent, new UTF8Encoding(true));
+                        MessageBox.Show("Данные успешно экспортированы!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GenerateCsvContent()
+        {
+            var sb = new StringBuilder();
+            // Заголовок с разделителем ;
+            sb.AppendLine("Параметр;Значение;Вкладка");
+
+            // Вспомогательная функция форматирования (2 знака после запятой, точка как разделитель)
+            string F(decimal d) => d.ToString("F2", CultureInfo.InvariantCulture);
+
+            // === ВКЛАДКА 1: Базовые параметры ===
+            sb.AppendLine($"Объем выпуска (Q);{F(nudOutputVolume.Value)};1");
+            sb.AppendLine($"Цена реализации (P);{F(nudPricePerUnit.Value)};1");
+            sb.AppendLine($"Сырье и материалы (ед.);{F(nudRawMaterials.Value)};1");
+            sb.AppendLine($"Энергия/транспорт (ед.);{F(nudEnergyTransport.Value)};1");
+            sb.AppendLine($"Сдельная ЗП (ед.);{F(nudPieceworkWage.Value)};1");
+            sb.AppendLine($"Аренда помещения;{F(nudRent.Value)};1");
+            sb.AppendLine($"Амортизация оборудования;{F(nudDepreciation.Value)};1");
+            sb.AppendLine($"Окладная часть ЗП;{F(nudSalaryAdmin.Value)};1");
+            sb.AppendLine($"Коммунальные услуги;{F(nudUtilities.Value)};1");
+            sb.AppendLine($"Проценты по кредитам;{F(nudLoanInterest.Value)};1");
+            sb.AppendLine($"Ставка соц. отчислений (%);{F(nudSocialRate.Value)};1");
+            sb.AppendLine($"Налог на прибыль (%);{F(nudProfitTaxRate.Value)};1");
+
+            // === ВКЛАДКА 3: Детальная структура ===
+            sb.AppendLine($"Прямые: Сырье (ед.);{F(nudRawMaterialsDirect.Value)};3");
+            sb.AppendLine($"Прямые: ЗП основного (ед.);{F(nudMainLaborWage.Value)};3");
+            sb.AppendLine($"Общепроизв.: ЗП вспомогательного;{F(nudAuxiliaryLaborWage.Value)};3");
+            sb.AppendLine($"Общепроизв.: Тех. энергия/вода;{F(nudTechnologicalEnergy.Value)};3");
+            sb.AppendLine($"Общепроизв.: Прочие (%);{F(nudOtherProdOverheadPerc.Value)};3");
+            sb.AppendLine($"Админ: ЗП АУП;{F(nudAdminStaffWage.Value)};3");
+            sb.AppendLine($"Админ: Аренда;{F(nudRentAdmin.Value)};3");
+            sb.AppendLine($"Админ: Отопление;{F(nudHeating.Value)};3");
+            sb.AppendLine($"Админ: Связь;{F(nudCommunication.Value)};3");
+            sb.AppendLine($"Админ: Охрана;{F(nudSecurity.Value)};3");
+            sb.AppendLine($"Админ: Канцелярия;{F(nudOfficeSupplies.Value)};3");
+            sb.AppendLine($"Админ: Прочие (%);{F(nudOtherAdminPerc.Value)};3");
+            sb.AppendLine($"Эксплуат: Амортизация;{F(nudDepreciationCost.Value)};3");
+            sb.AppendLine($"Эксплуат: Лизинг;{F(nudLeasePayments.Value)};3");
+            sb.AppendLine($"Эксплуат: Проценты;{F(nudLoanInterestCost.Value)};3");
+            sb.AppendLine($"Эксплуат: Налоги;{F(nudTaxesInCost.Value)};3");
+            sb.AppendLine($"Коммерческие: ЗП сбыта;{F(nudSalesStaffWage.Value)};3");
+            sb.AppendLine($"Коммерческие: Прочие (%);{F(nudOtherCommPerc.Value)};3");
+            sb.AppendLine($"Неявные: Упущенный %;{F(nudOpportunityCapital.Value)};3");
+            sb.AppendLine($"Неявные: Упущенная ЗП;{F(nudOpportunityLabor.Value)};3");
+            sb.AppendLine($"Неявные: Упущенная рента;{F(nudOpportunityRent.Value)};3");
+            sb.AppendLine($"Неявные: Нормальная прибыль;{F(nudNormalProfit.Value)};3");
+
+            return sb.ToString();
+        }
     }
 }
