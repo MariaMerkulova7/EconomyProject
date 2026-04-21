@@ -23,6 +23,211 @@ namespace EduCostCalc
             _currentCompany = new Company();
             _calculator = new CostCalculator(_currentCompany);
             _detailedCalculator = new DetailedCostCalculator(_currentCompany);
+
+            SetupMainMenu();
+            tabControl1.Dock = DockStyle.Fill;
+
+        }
+
+        private void SetupMainMenu()
+        {
+            var menuStrip = new MenuStrip();
+            menuStrip.Dock = DockStyle.Top;
+            menuStrip.Font = new Font("Segoe UI", 9F);
+
+            var fileMenu = new ToolStripMenuItem("&Файл");
+
+            var exportItem = new ToolStripMenuItem("Экспорт в CSV", null, (s, e) => BtnExportCsv_Click(this, EventArgs.Empty));
+            var importItem = new ToolStripMenuItem("Импорт из CSV", null, (s, e) => BtnImportCsv_Click(this, EventArgs.Empty));
+
+            fileMenu.DropDownItems.Add(exportItem);
+            fileMenu.DropDownItems.Add(new ToolStripSeparator());
+            fileMenu.DropDownItems.Add(importItem);
+
+            // Пункт "Выход"
+            fileMenu.DropDownItems.Add(new ToolStripSeparator());
+            var exitItem = new ToolStripMenuItem("Выход", null, (s, e) => Application.Exit());
+            fileMenu.DropDownItems.Add(exitItem);
+
+            menuStrip.Items.Add(fileMenu);
+
+            // Добавляем меню на форму (до TabControl, чтобы TabControl сжался)
+            this.Controls.Add(menuStrip);
+            this.MainMenuStrip = menuStrip;
+        }
+
+        // ================= EXPORT LOGIC =================
+
+        private void BtnExportCsv_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Синхронизируем данные из полей в модель
+                SaveFormDataToCompany();
+                SaveDetailedFormData();
+
+                using (var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "CSV файлы|*.csv|Все файлы|*.*",
+                    FileName = $"EduCostCalc_Export_{DateTime.Now:yyyyMMdd_HHmm}.csv",
+                    DefaultExt = "csv",
+                    Title = "Сохранить расчет в CSV"
+                })
+                {
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var csvContent = GenerateCsvContent();
+                        // UTF8 с BOM для корректного отображения кириллицы в Excel
+                        File.WriteAllText(saveFileDialog.FileName, csvContent, new UTF8Encoding(true));
+                        MessageBox.Show("Данные успешно экспортированы!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GenerateCsvContent()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Параметр;Значение;Вкладка");
+
+            // Вспомогательная функция форматирования (2 знака, точка как разделитель)
+            string F(decimal d) => d.ToString("F2", CultureInfo.InvariantCulture);
+
+            // === ВКЛАДКА 1: Базовые параметры ===
+            sb.AppendLine($"Объем выпуска (Q);{F(nudOutputVolume.Value)};1");
+            sb.AppendLine($"Цена реализации (P);{F(nudPricePerUnit.Value)};1");
+            sb.AppendLine($"Сырье и материалы (ед.);{F(nudRawMaterials.Value)};1");
+            sb.AppendLine($"Энергия/транспорт (ед.);{F(nudEnergyTransport.Value)};1");
+            sb.AppendLine($"Сдельная ЗП (ед.);{F(nudPieceworkWage.Value)};1");
+            sb.AppendLine($"Аренда помещения;{F(nudRent.Value)};1");
+            sb.AppendLine($"Амортизация оборудования;{F(nudDepreciation.Value)};1");
+            sb.AppendLine($"Окладная часть ЗП;{F(nudSalaryAdmin.Value)};1");
+            sb.AppendLine($"Коммунальные услуги;{F(nudUtilities.Value)};1");
+            sb.AppendLine($"Проценты по кредитам;{F(nudLoanInterest.Value)};1");
+            sb.AppendLine($"Ставка соц. отчислений (%);{F(nudSocialRate.Value)};1");
+            sb.AppendLine($"Налог на прибыль (%);{F(nudProfitTaxRate.Value)};1");
+
+            // === ВКЛАДКА 3: Детальная структура ===
+            sb.AppendLine($"Прямые: Сырье (ед.);{F(nudRawMaterialsDirect.Value)};3");
+            sb.AppendLine($"Прямые: ЗП основного (ед.);{F(nudMainLaborWage.Value)};3");
+            sb.AppendLine($"Общепроизв.: ЗП вспомогательного;{F(nudAuxiliaryLaborWage.Value)};3");
+            sb.AppendLine($"Общепроизв.: Тех. энергия/вода;{F(nudTechnologicalEnergy.Value)};3");
+            sb.AppendLine($"Общепроизв.: Прочие (%);{F(nudOtherProdOverheadPerc.Value)};3");
+            sb.AppendLine($"Админ: ЗП АУП;{F(nudAdminStaffWage.Value)};3");
+            sb.AppendLine($"Админ: Аренда;{F(nudRentAdmin.Value)};3");
+            sb.AppendLine($"Админ: Отопление;{F(nudHeating.Value)};3");
+            sb.AppendLine($"Админ: Связь;{F(nudCommunication.Value)};3");
+            sb.AppendLine($"Админ: Охрана;{F(nudSecurity.Value)};3");
+            sb.AppendLine($"Админ: Канцелярия;{F(nudOfficeSupplies.Value)};3");
+            sb.AppendLine($"Админ: Прочие (%);{F(nudOtherAdminPerc.Value)};3");
+            sb.AppendLine($"Эксплуат: Амортизация;{F(nudDepreciationCost.Value)};3");
+            sb.AppendLine($"Эксплуат: Лизинг;{F(nudLeasePayments.Value)};3");
+            sb.AppendLine($"Эксплуат: Проценты;{F(nudLoanInterestCost.Value)};3");
+            sb.AppendLine($"Эксплуат: Налоги;{F(nudTaxesInCost.Value)};3");
+            sb.AppendLine($"Коммерческие: ЗП сбыта;{F(nudSalesStaffWage.Value)};3");
+            sb.AppendLine($"Коммерческие: Прочие (%);{F(nudOtherCommPerc.Value)};3");
+            sb.AppendLine($"Неявные: Упущенный %;{F(nudOpportunityCapital.Value)};3");
+            sb.AppendLine($"Неявные: Упущенная ЗП;{F(nudOpportunityLabor.Value)};3");
+            sb.AppendLine($"Неявные: Упущенная рента;{F(nudOpportunityRent.Value)};3");
+            sb.AppendLine($"Неявные: Нормальная прибыль;{F(nudNormalProfit.Value)};3");
+
+            return sb.ToString();
+        }
+
+        // ================= IMPORT LOGIC =================
+
+        private void BtnImportCsv_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "CSV файлы|*.csv|Все файлы|*.*",
+                    Title = "Загрузить данные из CSV",
+                    CheckFileExists = true
+                })
+                {
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        ImportCsvData(openFileDialog.FileName);
+                        MessageBox.Show("Данные успешно загружены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка импорта: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ImportCsvData(string filePath)
+        {
+            var lines = File.ReadAllLines(filePath, new UTF8Encoding(true));
+
+            // Пропускаем заголовок, читаем данные
+            foreach (var line in lines.Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = line.Split(';');
+                if (parts.Length < 2) continue;
+
+                var paramName = parts[0].Trim();
+
+                // Пробуем распарсить значение (используем инвариантную культуру, так как в CSV точка)
+                if (!decimal.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal value))
+                    continue;
+
+                // === ЗАПОЛНЕНИЕ ПОЛЕЙ ПО ИМЕНИ ===
+                switch (paramName)
+                {
+                    // Вкладка 1
+                    case "Объем выпуска (Q)": nudOutputVolume.Value = value; break;
+                    case "Цена реализации (P)": nudPricePerUnit.Value = value; break;
+                    case "Сырье и материалы (ед.)": nudRawMaterials.Value = value; break;
+                    case "Энергия/транспорт (ед.)": nudEnergyTransport.Value = value; break;
+                    case "Сдельная ЗП (ед.)": nudPieceworkWage.Value = value; break;
+                    case "Аренда помещения": nudRent.Value = value; break;
+                    case "Амортизация оборудования": nudDepreciation.Value = value; break;
+                    case "Окладная часть ЗП": nudSalaryAdmin.Value = value; break;
+                    case "Коммунальные услуги": nudUtilities.Value = value; break;
+                    case "Проценты по кредитам": nudLoanInterest.Value = value; break;
+                    case "Ставка соц. отчислений (%)": nudSocialRate.Value = value; break;
+                    case "Налог на прибыль (%)": nudProfitTaxRate.Value = value; break;
+
+                    // Вкладка 3
+                    case "Прямые: Сырье (ед.)": nudRawMaterialsDirect.Value = value; break;
+                    case "Прямые: ЗП основного (ед.)": nudMainLaborWage.Value = value; break;
+                    case "Общепроизв.: ЗП вспомогательного": nudAuxiliaryLaborWage.Value = value; break;
+                    case "Общепроизв.: Тех. энергия/вода": nudTechnologicalEnergy.Value = value; break;
+                    case "Общепроизв.: Прочие (%)": nudOtherProdOverheadPerc.Value = value; break;
+                    case "Админ: ЗП АУП": nudAdminStaffWage.Value = value; break;
+                    case "Админ: Аренда": nudRentAdmin.Value = value; break;
+                    case "Админ: Отопление": nudHeating.Value = value; break;
+                    case "Админ: Связь": nudCommunication.Value = value; break;
+                    case "Админ: Охрана": nudSecurity.Value = value; break;
+                    case "Админ: Канцелярия": nudOfficeSupplies.Value = value; break;
+                    case "Админ: Прочие (%)": nudOtherAdminPerc.Value = value; break;
+                    case "Эксплуат: Амортизация": nudDepreciationCost.Value = value; break;
+                    case "Эксплуат: Лизинг": nudLeasePayments.Value = value; break;
+                    case "Эксплуат: Проценты": nudLoanInterestCost.Value = value; break;
+                    case "Эксплуат: Налоги": nudTaxesInCost.Value = value; break;
+                    case "Коммерческие: ЗП сбыта": nudSalesStaffWage.Value = value; break;
+                    case "Коммерческие: Прочие (%)": nudOtherCommPerc.Value = value; break;
+                    case "Неявные: Упущенный %": nudOpportunityCapital.Value = value; break;
+                    case "Неявные: Упущенная ЗП": nudOpportunityLabor.Value = value; break;
+                    case "Неявные: Упущенная рента": nudOpportunityRent.Value = value; break;
+                    case "Неявные: Нормальная прибыль": nudNormalProfit.Value = value; break;
+                }
+            }
+
+            // После импорта обновляем модель
+            SaveFormDataToCompany();
+            SaveDetailedFormData();
         }
 
         // ================= TAB 1: INPUT & SAVE =================
@@ -307,86 +512,6 @@ namespace EduCostCalc
                 MessageBox.Show($"Ошибка при отрисовке графиков: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void BtnExportCsv_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Синхронизируем данные из полей в модель (гарантируем актуальность)
-                SaveFormDataToCompany();
-                SaveDetailedFormData();
-
-                using (var saveFileDialog = new SaveFileDialog
-                {
-                    Filter = "CSV файлы|*.csv|Все файлы|*.*",
-                    FileName = $"EduCostCalc_Export_{DateTime.Now:yyyyMMdd_HHmm}.csv",
-                    DefaultExt = "csv"
-                })
-                {
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        var csvContent = GenerateCsvContent();
-                        // UTF8 с BOM для корректного открытия кириллицы в Excel
-                        File.WriteAllText(saveFileDialog.FileName, csvContent, new UTF8Encoding(true));
-                        MessageBox.Show("Данные успешно экспортированы!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private string GenerateCsvContent()
-        {
-            var sb = new StringBuilder();
-            // Заголовок с разделителем ;
-            sb.AppendLine("Параметр;Значение;Вкладка");
-
-            // Вспомогательная функция форматирования (2 знака после запятой, точка как разделитель)
-            string F(decimal d) => d.ToString("F2", CultureInfo.InvariantCulture);
-
-            // === ВКЛАДКА 1: Базовые параметры ===
-            sb.AppendLine($"Объем выпуска (Q);{F(nudOutputVolume.Value)};1");
-            sb.AppendLine($"Цена реализации (P);{F(nudPricePerUnit.Value)};1");
-            sb.AppendLine($"Сырье и материалы (ед.);{F(nudRawMaterials.Value)};1");
-            sb.AppendLine($"Энергия/транспорт (ед.);{F(nudEnergyTransport.Value)};1");
-            sb.AppendLine($"Сдельная ЗП (ед.);{F(nudPieceworkWage.Value)};1");
-            sb.AppendLine($"Аренда помещения;{F(nudRent.Value)};1");
-            sb.AppendLine($"Амортизация оборудования;{F(nudDepreciation.Value)};1");
-            sb.AppendLine($"Окладная часть ЗП;{F(nudSalaryAdmin.Value)};1");
-            sb.AppendLine($"Коммунальные услуги;{F(nudUtilities.Value)};1");
-            sb.AppendLine($"Проценты по кредитам;{F(nudLoanInterest.Value)};1");
-            sb.AppendLine($"Ставка соц. отчислений (%);{F(nudSocialRate.Value)};1");
-            sb.AppendLine($"Налог на прибыль (%);{F(nudProfitTaxRate.Value)};1");
-
-            // === ВКЛАДКА 3: Детальная структура ===
-            sb.AppendLine($"Прямые: Сырье (ед.);{F(nudRawMaterialsDirect.Value)};3");
-            sb.AppendLine($"Прямые: ЗП основного (ед.);{F(nudMainLaborWage.Value)};3");
-            sb.AppendLine($"Общепроизв.: ЗП вспомогательного;{F(nudAuxiliaryLaborWage.Value)};3");
-            sb.AppendLine($"Общепроизв.: Тех. энергия/вода;{F(nudTechnologicalEnergy.Value)};3");
-            sb.AppendLine($"Общепроизв.: Прочие (%);{F(nudOtherProdOverheadPerc.Value)};3");
-            sb.AppendLine($"Админ: ЗП АУП;{F(nudAdminStaffWage.Value)};3");
-            sb.AppendLine($"Админ: Аренда;{F(nudRentAdmin.Value)};3");
-            sb.AppendLine($"Админ: Отопление;{F(nudHeating.Value)};3");
-            sb.AppendLine($"Админ: Связь;{F(nudCommunication.Value)};3");
-            sb.AppendLine($"Админ: Охрана;{F(nudSecurity.Value)};3");
-            sb.AppendLine($"Админ: Канцелярия;{F(nudOfficeSupplies.Value)};3");
-            sb.AppendLine($"Админ: Прочие (%);{F(nudOtherAdminPerc.Value)};3");
-            sb.AppendLine($"Эксплуат: Амортизация;{F(nudDepreciationCost.Value)};3");
-            sb.AppendLine($"Эксплуат: Лизинг;{F(nudLeasePayments.Value)};3");
-            sb.AppendLine($"Эксплуат: Проценты;{F(nudLoanInterestCost.Value)};3");
-            sb.AppendLine($"Эксплуат: Налоги;{F(nudTaxesInCost.Value)};3");
-            sb.AppendLine($"Коммерческие: ЗП сбыта;{F(nudSalesStaffWage.Value)};3");
-            sb.AppendLine($"Коммерческие: Прочие (%);{F(nudOtherCommPerc.Value)};3");
-            sb.AppendLine($"Неявные: Упущенный %;{F(nudOpportunityCapital.Value)};3");
-            sb.AppendLine($"Неявные: Упущенная ЗП;{F(nudOpportunityLabor.Value)};3");
-            sb.AppendLine($"Неявные: Упущенная рента;{F(nudOpportunityRent.Value)};3");
-            sb.AppendLine($"Неявные: Нормальная прибыль;{F(nudNormalProfit.Value)};3");
-
-            return sb.ToString();
         }
     }
 }

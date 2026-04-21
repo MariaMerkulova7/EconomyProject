@@ -69,15 +69,6 @@
             btnCalculate = new Button() { Location = new Point(180, 610), Size = new Size(150, 30), Text = "Рассчитать" };
             btnCalculate.Click += BtnCalculate_Click;
 
-            var btnExportCsv = new Button()
-            {
-                Location = new Point(345, 610),
-                Size = new Size(150, 30),
-                Text = "Экспорт CSV",
-                BackColor = Color.LightYellow
-            };
-            btnExportCsv.Click += BtnExportCsv_Click;
-
             // Добавление на вкладку
             tabPage1.Controls.AddRange(new Control[] {
                 lblProductionGroup, lblOutputVolume, nudOutputVolume, lblPricePerUnit, nudPricePerUnit,
@@ -85,7 +76,7 @@
                 lblPieceworkWage, nudPieceworkWage, lblFixedCostsGroup, lblRent, nudRent, lblDepreciation,
                 nudDepreciation, lblSalaryAdmin, nudSalaryAdmin, lblUtilities, nudUtilities, lblLoanInterest,
                 nudLoanInterest, lblTaxSettingsGroup, lblSocialRate, nudSocialRate, lblProfitTaxRate,
-                nudProfitTaxRate, btnSaveData, btnCalculate, btnExportCsv
+                nudProfitTaxRate, btnSaveData, btnCalculate
             });
         }
     }
