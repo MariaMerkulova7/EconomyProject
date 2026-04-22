@@ -65,13 +65,14 @@ namespace EduCostCalc
             var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
             var price = _currentCompany.Production.PricePerUnit;
 
-            // ✅ Легенда для графика издержек
+            // ✅ ОБНОВЛЕННАЯ легенда для графика издержек (добавлена TR)
             var legend = new[]
             {
-            new Helpers.ChartDrawer.LegendItem { Label = "FC (Постоянные)", Color = Color.Red, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
-            new Helpers.ChartDrawer.LegendItem { Label = "VC (Переменные)", Color = Color.Blue, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
-            new Helpers.ChartDrawer.LegendItem { Label = "TC (Совокупные)", Color = Color.Green, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
-        };
+                new Helpers.ChartDrawer.LegendItem { Label = "FC (Постоянные)", Color = Color.Red, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Dash },
+                new Helpers.ChartDrawer.LegendItem { Label = "VC (Переменные)", Color = Color.Blue, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
+                new Helpers.ChartDrawer.LegendItem { Label = "TC (Совокупные)", Color = Color.Green, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
+                new Helpers.ChartDrawer.LegendItem { Label = "TR (Выручка)", Color = Color.DarkOrange, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
+            };
 
             Helpers.ChartDrawer.DrawCostCurves(e.Graphics,
                 new Rectangle(10, 10, panelCostCurves.Width - 20, panelCostCurves.Height - 20),
@@ -91,11 +92,11 @@ namespace EduCostCalc
             var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
             var price = _currentCompany.Production.PricePerUnit;
 
-            // ✅ Легенда для графика прибыли
+            // Легенда для графика прибыли
             var legend = new[]
             {
-            new Helpers.ChartDrawer.LegendItem { Label = "Прибыль", Color = Color.DarkBlue, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
-        };
+                new Helpers.ChartDrawer.LegendItem { Label = "Прибыль", Color = Color.DarkBlue, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
+            };
 
             Helpers.ChartDrawer.DrawProfitChart(e.Graphics,
                 new Rectangle(10, 10, panelProfitCurves.Width - 20, panelProfitCurves.Height - 20),

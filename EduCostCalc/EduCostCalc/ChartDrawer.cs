@@ -22,7 +22,7 @@ namespace EduCostCalc.Helpers
         {
             g.Clear(Color.White);
 
-            // Сетки
+            // Сетка
             using (var gridPen = new Pen(Color.LightGray, 1))
             {
                 for (int i = 0; i <= 10; i++)
@@ -34,7 +34,7 @@ namespace EduCostCalc.Helpers
                 }
             }
 
-            // Оси
+            // Оси координат
             using (var axisPen = new Pen(Color.Black, 2))
             {
                 g.DrawLine(axisPen, bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom);
@@ -42,24 +42,29 @@ namespace EduCostCalc.Helpers
             }
 
             var maxQ = volumes[^1];
-            var maxCost = fc + (avc * maxQ) * 1.1m;
-            if (maxCost == 0) maxCost = 100m;
+            var maxRevenue = price * maxQ;
+            var maxCost = fc + (avc * maxQ);
+            var maxVal = Math.Max(maxRevenue, maxCost) * 1.1m;
+            if (maxVal == 0) maxVal = 100m;
 
+            // Функции масштабирования
             double ScaleX(decimal q) => bounds.Left + (double)(q / maxQ) * bounds.Width * 0.82;
-            double ScaleY(decimal value) => bounds.Bottom - (double)(value / maxCost) * bounds.Height;
+            double ScaleY(decimal value) => bounds.Bottom - (double)(value / maxVal) * bounds.Height;
 
-            // FC
-            using (var pen = new Pen(Color.Red, 2))
+            // 1. FC (Постоянные издержки) - Красный пунктир
+            using (var pen = new Pen(Color.Red, 2) { DashStyle = DashStyle.Dash })
+            {
                 g.DrawLine(pen, (int)ScaleX(volumes[0]), (int)ScaleY(fc),
                                (int)ScaleX(volumes[^1]), (int)ScaleY(fc));
+            }
 
-            // VC и TC
+            // 2. VC (Переменные издержки) - Синий
+            // 3. TC (Совокупные издержки) - Зеленый
             using (var vcPen = new Pen(Color.Blue, 2))
             using (var tcPen = new Pen(Color.Green, 3))
             {
                 for (int i = 1; i < volumes.Length; i++)
                 {
-                    // ✅ ИСПРАВЛЕНИЕ: разделили объявление var на две строки
                     var q1 = volumes[i - 1];
                     var q2 = volumes[i];
 
@@ -70,15 +75,57 @@ namespace EduCostCalc.Helpers
                 }
             }
 
+            // 4. TR (Выручка) - Оранжевый жирный
+            using (var trPen = new Pen(Color.DarkOrange, 3))
+            {
+                g.DrawLine(trPen, (int)ScaleX(volumes[0]), (int)ScaleY(0),
+                                     (int)ScaleX(volumes[^1]), (int)ScaleY(price * maxQ));
+            }
+
+            // 5. ТОЧКА БЕЗУБЫТОЧНОСТИ (BEP)
+            // BEP (шт) = FC / (P - AVC)
+            if (price > avc)
+            {
+                decimal bepQ = fc / (price - avc);
+
+                // Рисуем только если точка попадает в видимую область графика
+                if (bepQ <= maxQ && bepQ >= 0)
+                {
+                    // Вертикальная пунктирная линия (Magenta)
+                    using (var bepPen = new Pen(Color.Magenta, 2) { DashStyle = DashStyle.DashDot })
+                    {
+                        int xBep = (int)ScaleX(bepQ);
+                        g.DrawLine(bepPen, xBep, bounds.Top, xBep, bounds.Bottom);
+                    }
+
+                    // Маркер точки пересечения (круг)
+                    int xBepPixel = (int)ScaleX(bepQ);
+                    int yBepPixel = (int)ScaleY(price * bepQ); // TR = TC в этой точке
+
+                    using (var markerPen = new Pen(Color.Magenta, 3))
+                    {
+                        g.DrawEllipse(markerPen, xBepPixel - 6, yBepPixel - 6, 12, 12);
+                    }
+
+                    // Подпись BEP
+                    using (var font = new Font("Segoe UI", 8F, FontStyle.Bold))
+                    using (var brush = new SolidBrush(Color.Magenta))
+                    {
+                        g.DrawString("BEP", font, brush, xBepPixel + 8, yBepPixel - 15);
+                        g.DrawString($"Q={bepQ:N0}", new Font("Segoe UI", 7F), brush, xBepPixel + 8, yBepPixel - 2);
+                    }
+                }
+            }
+
             // Подписи осей
             using (var font = new Font("Segoe UI", 9F))
             using (var brush = new SolidBrush(Color.Black))
             {
-                g.DrawString("Q (объем выпуска)", font, brush, bounds.Right - 90, bounds.Bottom + 25);
-                g.DrawString("Издержки (руб.)", font, brush, bounds.Left + 5, bounds.Top - 35);
+                g.DrawString("Q (объем выпуска, шт.)", font, brush, bounds.Right - 140, bounds.Bottom + 25);
+                g.DrawString("Издержки / Выручка (руб.)", font, brush, bounds.Left + 5, bounds.Top - 35);
             }
 
-            // ✅ Легенда (справа)
+            // Легенда
             if (legendItems != null && legendItems.Length > 0)
                 DrawLegend(g, bounds, legendItems);
         }
@@ -89,6 +136,7 @@ namespace EduCostCalc.Helpers
         {
             g.Clear(Color.White);
 
+            // Сетка
             using (var gridPen = new Pen(Color.LightGray, 1))
             {
                 for (int i = 0; i <= 10; i++)
@@ -100,10 +148,13 @@ namespace EduCostCalc.Helpers
                 }
             }
 
+            // Оси координат
             using (var axisPen = new Pen(Color.Black, 2))
             {
+                // Горизонтальная ось (линия нулевой прибыли)
                 g.DrawLine(axisPen, bounds.Left, bounds.Top + bounds.Height / 2,
                     bounds.Right, bounds.Top + bounds.Height / 2);
+                // Вертикальная ось
                 g.DrawLine(axisPen, bounds.Left, bounds.Top, bounds.Left, bounds.Bottom);
             }
 
@@ -114,38 +165,51 @@ namespace EduCostCalc.Helpers
             var scale = maxProfit * 1.1m;
             if (scale == 0) scale = 100m;
 
+            // Функции масштабирования
             double ScaleX(decimal q) => bounds.Left + (double)(q / maxQ) * bounds.Width * 0.82;
             double ScaleY(decimal profit) => bounds.Top + bounds.Height / 2 -
                 (double)(profit / scale) * bounds.Height / 2;
 
+            // Линия прибыли
             using (var profitPen = new Pen(Color.DarkBlue, 3))
             {
                 for (int i = 1; i < volumes.Length; i++)
                 {
-                    // ✅ ИСПРАВЛЕНИЕ: разделили все var-объявления
                     var q1 = volumes[i - 1];
                     var q2 = volumes[i];
                     var p1 = (price - avc) * q1 - fc;
                     var p2 = (price - avc) * q2 - fc;
 
                     g.DrawLine(profitPen, (int)ScaleX(q1), (int)ScaleY(p1),
-                                           (int)ScaleX(q2), (int)ScaleY(p2));
+                                            (int)ScaleX(q2), (int)ScaleY(p2));
                 }
             }
 
-            using (var font = new Font("Segoe UI", 9F))
+            // Подпись нулевой линии (точка безубыточности)
+            using (var font = new Font("Segoe UI", 8F, FontStyle.Bold))
+            using (var brush = new SolidBrush(Color.Red))
             {
-                g.DrawString("Прибыль / Убыток", font, Brushes.Black, bounds.Left + 5, bounds.Top - 30);
+                g.DrawString("Зона безубыточности (Прибыль = 0)", font, brush,
+                    bounds.Right - 200, bounds.Top + bounds.Height / 2 + 5);
             }
 
+            // Подписи осей
+            using (var font = new Font("Segoe UI", 9F))
+            {
+                g.DrawString("Q (объем выпуска, шт.)", font, Brushes.Black, bounds.Right - 140, bounds.Bottom + 25);
+                g.DrawString("Прибыль / Убыток (руб.)", font, Brushes.Black, bounds.Left + 5, bounds.Top - 30);
+            }
+
+            // Легенда
             if (legendItems != null && legendItems.Length > 0)
                 DrawLegend(g, bounds, legendItems);
         }
 
-        // ✅ Вспомогательный метод отрисовки легенды
+        // Вспомогательный метод отрисовки легенды
         private static void DrawLegend(Graphics g, Rectangle bounds, LegendItem[] items)
         {
-            int legendX = bounds.Left + (int)(bounds.Width * 0.83); int legendY = bounds.Top + 10;
+            int legendX = bounds.Left + (int)(bounds.Width * 0.83);
+            int legendY = bounds.Top + 10;
             int itemHeight = 22;
 
             using (var font = new Font("Segoe UI", 8F))
@@ -156,7 +220,7 @@ namespace EduCostCalc.Helpers
                 g.DrawString("Условные обозначения", titleFont, brush, legendX, legendY);
                 legendY += 18;
 
-                // Элементы
+                // Элементы легенды
                 foreach (var item in items)
                 {
                     // Линия-образец
