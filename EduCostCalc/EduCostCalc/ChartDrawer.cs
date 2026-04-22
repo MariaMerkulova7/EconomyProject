@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -8,7 +9,7 @@ namespace EduCostCalc.Helpers
         public static void DrawCostCurves(Graphics g, Rectangle bounds,
             decimal[] volumes, decimal fc, decimal avc, decimal price)
         {
-            // Очистка
+            // Очистка фона
             g.Clear(Color.White);
 
             // Сетки
@@ -34,7 +35,10 @@ namespace EduCostCalc.Helpers
             var maxQ = volumes[^1];
             var maxCost = fc + (avc * maxQ) * 1.1m;
 
-            // Функция масштабирования
+            // ИСПРАВЛЕНИЕ: Если maxCost = 0 (пустая форма), задаем дефолтный масштаб,
+            // чтобы избежать деления на ноль в функции ScaleY
+            if (maxCost == 0) maxCost = 100m;
+
             double ScaleX(decimal q) => bounds.Left + (double)(q / maxQ) * bounds.Width;
             double ScaleY(decimal value) => bounds.Bottom - (double)(value / maxCost) * bounds.Height;
 
@@ -94,8 +98,9 @@ namespace EduCostCalc.Helpers
             // Оси
             using (var axisPen = new Pen(Color.Black, 2))
             {
+                // Ось X (нулевая прибыль) по центру, если позволяет масштаб
                 g.DrawLine(axisPen, bounds.Left, bounds.Top + bounds.Height / 2,
-                    bounds.Right, bounds.Top + bounds.Height / 2); // X (нулевая прибыль)
+                    bounds.Right, bounds.Top + bounds.Height / 2);
                 g.DrawLine(axisPen, bounds.Left, bounds.Top, bounds.Left, bounds.Bottom); // Y
             }
 
@@ -104,6 +109,9 @@ namespace EduCostCalc.Helpers
                 Math.Abs((decimal)(price - avc) * volumes[0] - fc),
                 Math.Abs((decimal)(price - avc) * maxQ - fc));
             var scale = maxProfit * 1.1m;
+
+            // ИСПРАВЛЕНИЕ: Если scale = 0 (нет прибыли/убытков), задаем дефолт
+            if (scale == 0) scale = 100m;
 
             double ScaleX(decimal q) => bounds.Left + (double)(q / maxQ) * bounds.Width;
             double ScaleY(decimal profit) => bounds.Top + bounds.Height / 2 -
@@ -132,5 +140,7 @@ namespace EduCostCalc.Helpers
                 g.DrawString("Убыток", font, Brushes.Black, bounds.Left + 5, bounds.Bottom - 20);
             }
         }
+
+
     }
 }
