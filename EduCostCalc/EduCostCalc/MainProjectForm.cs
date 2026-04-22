@@ -478,6 +478,9 @@ namespace EduCostCalc
                 else if (tabControl1.SelectedIndex == 2)
                     SaveDetailedFormData();
 
+
+                panelCostCurves?.Invalidate();
+                panelProfitCurves?.Invalidate();
             }
             catch (Exception ex)
             {

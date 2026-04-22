@@ -5,10 +5,8 @@ namespace EduCostCalc
 {
     partial class MainForm
     {
-        private Panel panelChart1;
-        private Panel panelChart2;
-        private ComboBox cboChartType;
-        private Button btnRefreshCharts;
+        private Panel panelCostCurves;
+        private Panel panelProfitCurves;
 
         private void InitializeTab4()
         {
@@ -29,40 +27,8 @@ namespace EduCostCalc
                 Padding = new Padding(10)
             };
 
-            var lblChartHint = new Label
-            {
-                AutoSize = true,
-                Location = new Point(10, 10),
-                Text = "Выберите тип отображения:",
-                Font = new Font("Segoe UI", 9F)
-            };
-
-            cboChartType = new ComboBox
-            {
-                Location = new Point(180, 8),
-                Size = new Size(250, 23),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            cboChartType.Items.AddRange(new[] {
-            "Кривые издержек",
-            "Прибыль",
-            "Оба графика"
-        });
-            cboChartType.SelectedIndex = 2;
-
-            btnRefreshCharts = new Button
-            {
-                Location = new Point(450, 5),
-                Size = new Size(130, 30),
-                Text = "Обновить",
-                BackColor = Color.LightBlue
-            };
-            btnRefreshCharts.Click += BtnRefreshCharts_Click;
-
-            panelControls.Controls.AddRange(new Control[] { lblChartHint, cboChartType, btnRefreshCharts });
-
-            // Панель для графика 1
-            panelChart1 = new Panel
+            // Панель для графика издержек
+            panelCostCurves = new Panel
             {
                 Location = new Point(15, 75),
                 Size = new Size(970, 250),
@@ -70,10 +36,10 @@ namespace EduCostCalc
                 BorderStyle = BorderStyle.FixedSingle,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
-            panelChart1.Paint += PanelChart1_Paint;
+            panelCostCurves.Paint += PanelCostCurves_Paint;
 
-            // Панель для графика 2
-            panelChart2 = new Panel
+            // Панель для графика прибыли
+            panelProfitCurves = new Panel
             {
                 Location = new Point(15, 340),
                 Size = new Size(970, 250),
@@ -81,12 +47,12 @@ namespace EduCostCalc
                 BorderStyle = BorderStyle.FixedSingle,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
-            panelChart2.Paint += PanelChart2_Paint;
+            panelProfitCurves.Paint += PanelProfitCurves_Paint;
 
-            tabPage4.Controls.AddRange(new Control[] { panelControls, panelChart1, panelChart2 });
+            tabPage4.Controls.AddRange(new Control[] { panelControls, panelCostCurves, panelProfitCurves });
         }
 
-        private void PanelChart1_Paint(object sender, PaintEventArgs e)
+        private void PanelCostCurves_Paint(object sender, PaintEventArgs e)
         {
             if (_currentCompany == null) return;
 
@@ -98,13 +64,21 @@ namespace EduCostCalc
             var fc = _currentCompany.FixedCosts.TotalFixedCosts;
             var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
             var price = _currentCompany.Production.PricePerUnit;
+
+            // ✅ Легенда для графика издержек
+            var legend = new[]
+            {
+            new Helpers.ChartDrawer.LegendItem { Label = "FC (Постоянные)", Color = Color.Red, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
+            new Helpers.ChartDrawer.LegendItem { Label = "VC (Переменные)", Color = Color.Blue, LineWidth = 2, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid },
+            new Helpers.ChartDrawer.LegendItem { Label = "TC (Совокупные)", Color = Color.Green, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
+        };
 
             Helpers.ChartDrawer.DrawCostCurves(e.Graphics,
-                new Rectangle(10, 10, panelChart1.Width - 20, panelChart1.Height - 20),
-                volumes, fc, avc, price);
+                new Rectangle(10, 10, panelCostCurves.Width - 20, panelCostCurves.Height - 20),
+                volumes, fc, avc, price, legend);
         }
 
-        private void PanelChart2_Paint(object sender, PaintEventArgs e)
+        private void PanelProfitCurves_Paint(object sender, PaintEventArgs e)
         {
             if (_currentCompany == null) return;
 
@@ -117,9 +91,15 @@ namespace EduCostCalc
             var avc = _currentCompany.VariableCosts.TotalVariableCostPerUnit;
             var price = _currentCompany.Production.PricePerUnit;
 
+            // ✅ Легенда для графика прибыли
+            var legend = new[]
+            {
+            new Helpers.ChartDrawer.LegendItem { Label = "Прибыль", Color = Color.DarkBlue, LineWidth = 3, DashStyle = System.Drawing.Drawing2D.DashStyle.Solid }
+        };
+
             Helpers.ChartDrawer.DrawProfitChart(e.Graphics,
-                new Rectangle(10, 10, panelChart2.Width - 20, panelChart2.Height - 20),
-                volumes, fc, avc, price);
+                new Rectangle(10, 10, panelProfitCurves.Width - 20, panelProfitCurves.Height - 20),
+                volumes, fc, avc, price, legend);
         }
     }
 }
