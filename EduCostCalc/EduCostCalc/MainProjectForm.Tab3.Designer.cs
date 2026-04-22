@@ -230,46 +230,52 @@ namespace EduCostCalc
             // ==========================================
             int rightX = 560, rightY = 20;
 
-            groupBoxCostResults.Location = new Point(rightX, rightY); groupBoxCostResults.Size = new Size(520, 270); groupBoxCostResults.Text = "Структура себестоимости";
+            void AddInfoRow(GroupBox gb, Label l, Label v, string title, int y, Color c, bool bold, string infoKey)
+            {
+                SetupLabel(l, title, 10, y);
+                SetupValue(v, 210, y, c, bold);
+
+                var btn = new Button { Text = "ℹ", Size = new Size(25, 26), Font = new Font("Segoe UI", 10F, FontStyle.Bold), Location = new Point(365, y) };
+                btn.Click += (s, e) => ShowParameterInfo(infoKey);
+
+                gb.Controls.Add(l); gb.Controls.Add(v); gb.Controls.Add(btn);
+            }
+
+            groupBoxCostResults.Location = new Point(rightX, rightY); groupBoxCostResults.Size = new Size(520, 320); groupBoxCostResults.Text = "Структура себестоимости";
             int rcY = 25;
-            AddResultRow(lblResDirect, valResDirect, "Прямые затраты:", rcY, Color.DarkBlue); rcY += 25;
-            AddResultRow(lblResProdOverhead, valResProdOverhead, "Общепроизводственные:", rcY, Color.DarkBlue); rcY += 25;
-            AddResultRow(lblResAdmin, valResAdmin, "Общезаводские:", rcY, Color.DarkBlue); rcY += 25;
-            AddResultRow(lblResOperating, valResOperating, "Эксплуатационные:", rcY, Color.DarkBlue); rcY += 25;
-            AddResultRow(lblResProdCost, valResProdCost, "Производственная себестоимость:", rcY + 5, Color.DarkGreen, true); rcY += 35;
-            AddResultRow(lblResCommercial, valResCommercial, "Коммерческие расходы:", rcY, Color.DarkBlue); rcY += 25;
-            AddResultRow(lblResFullCost, valResFullCost, "ПОЛНАЯ СЕБЕСТОИМОСТЬ:", rcY, Color.DarkRed, true); rcY += 30;
-            AddResultRow(lblResCostPerUnit, valResCostPerUnit, "Себестоимость 1 ед.:", rcY, Color.Purple, true);
-            groupBoxCostResults.Controls.AddRange(new Control[] { lblResDirect, valResDirect, lblResProdOverhead, valResProdOverhead, lblResAdmin, valResAdmin, lblResOperating, valResOperating, lblResProdCost, valResProdCost, lblResCommercial, valResCommercial, lblResFullCost, valResFullCost, lblResCostPerUnit, valResCostPerUnit });
-            rightY += 290;
+            AddInfoRow(groupBoxCostResults, lblResDirect, valResDirect, "Прямые затраты: ", rcY, Color.DarkBlue, false, "Direct"); rcY += 28;
+            AddInfoRow(groupBoxCostResults, lblResProdOverhead, valResProdOverhead, "Общепроизводственные: ", rcY, Color.DarkBlue, false, "ProdOverhead"); rcY += 28;
+            AddInfoRow(groupBoxCostResults, lblResAdmin, valResAdmin, "Общезаводские: ", rcY, Color.DarkBlue, false, "Admin"); rcY += 28;
+            AddInfoRow(groupBoxCostResults, lblResOperating, valResOperating, "Эксплуатационные: ", rcY, Color.DarkBlue, false, "Operating"); rcY += 28;
+            AddInfoRow(groupBoxCostResults, lblResProdCost, valResProdCost, "Производственная себестоимость: ", rcY + 5, Color.DarkGreen, true, "ProdCost"); rcY += 33;
+            AddInfoRow(groupBoxCostResults, lblResCommercial, valResCommercial, "Коммерческие расходы: ", rcY, Color.DarkBlue, false, "Commercial"); rcY += 28;
+            AddInfoRow(groupBoxCostResults, lblResFullCost, valResFullCost, "ПОЛНАЯ СЕБЕСТОИМОСТЬ: ", rcY, Color.DarkRed, true, "FullCost"); rcY += 30;
+            AddInfoRow(groupBoxCostResults, lblResCostPerUnit, valResCostPerUnit, "Себестоимость 1 ед.: ", rcY, Color.Purple, true, "CostPerUnit");
+            rightY += 340;
 
-            groupBoxProfitResults.Location = new Point(rightX, rightY); groupBoxProfitResults.Size = new Size(520, 200); groupBoxProfitResults.Text = "Расчет прибыли";
+            groupBoxProfitResults.Location = new Point(rightX, rightY); groupBoxProfitResults.Size = new Size(520, 230); groupBoxProfitResults.Text = "Расчёт прибыли";
             int rpY = 25;
-            AddResultRow(lblResRevenue, valResRevenue, "Выручка (TR):", rpY, Color.Black, true); rpY += 25;
-            AddResultRow(lblResGrossProfit, valResGrossProfit, "Валовая прибыль:", rpY, Color.Blue); rpY += 25;
-            AddResultRow(lblResOperatingProfit, valResOperatingProfit, "Прибыль от реализации:", rpY, Color.Purple); rpY += 25;
-            AddResultRow(lblResNetProfit, valResNetProfit, "Чистая прибыль (после налога):", rpY, Color.Green, true); rpY += 25;
-            AddResultRow(lblResEconomicProfit, valResEconomicProfit, "Экономическая прибыль:", rpY + 5, Color.DarkOrange, true);
-            groupBoxProfitResults.Controls.AddRange(new Control[] { lblResRevenue, valResRevenue, lblResGrossProfit, valResGrossProfit, lblResOperatingProfit, valResOperatingProfit, lblResNetProfit, valResNetProfit, lblResEconomicProfit, valResEconomicProfit });
-            rightY += 220;
+            AddInfoRow(groupBoxProfitResults, lblResRevenue, valResRevenue, "Выручка (TR): ", rpY, Color.Black, true, "Revenue"); rpY += 28;
+            AddInfoRow(groupBoxProfitResults, lblResGrossProfit, valResGrossProfit, "Валовая прибыль: ", rpY, Color.Blue, false, "GrossProfit"); rpY += 28;
+            AddInfoRow(groupBoxProfitResults, lblResOperatingProfit, valResOperatingProfit, "Прибыль от реализации: ", rpY, Color.Purple, false, "OperatingProfit"); rpY += 28;
+            AddInfoRow(groupBoxProfitResults, lblResNetProfit, valResNetProfit, "Чистая прибыль: ", rpY, Color.Green, true, "NetProfit"); rpY += 28;
+            AddInfoRow(groupBoxProfitResults, lblResEconomicProfit, valResEconomicProfit, "Экономическая прибыль: ", rpY + 5, Color.DarkOrange, true, "EconomicProfit");
+            rightY += 250;
 
-            groupBoxEfficiency.Location = new Point(rightX, rightY); groupBoxEfficiency.Size = new Size(520, 150); groupBoxEfficiency.Text = "Показатели эффективности";
+            groupBoxEfficiency.Location = new Point(rightX, rightY); groupBoxEfficiency.Size = new Size(520, 180); groupBoxEfficiency.Text = "Показатели эффективности";
             int reY = 25;
-            AddResultRow(lblResCM, valResCM, "Маржинальная прибыль:", reY, Color.Teal); reY += 25;
-            AddResultRow(lblResCMRatio, valResCMRatio, "Коэф. марж. прибыли:", reY, Color.Teal); reY += 25;
-            AddResultRow(lblResProfitability, valResProfitability, "Рентабельность продукции:", reY, Color.DarkCyan); reY += 25;
-            AddResultRow(lblResROS, valResROS, "Рентабельность продаж (ROS):", reY, Color.DarkCyan);
-            groupBoxEfficiency.Controls.AddRange(new Control[] { lblResCM, valResCM, lblResCMRatio, valResCMRatio, lblResProfitability, valResProfitability, lblResROS, valResROS });
-            rightY += 170;
+            AddInfoRow(groupBoxEfficiency, lblResCM, valResCM, "Маржинальная прибыль: ", reY, Color.Teal, false, "CM"); reY += 28;
+            AddInfoRow(groupBoxEfficiency, lblResCMRatio, valResCMRatio, "Коэф. марж. прибыли: ", reY, Color.Teal, false, "CMRatio"); reY += 28;
+            AddInfoRow(groupBoxEfficiency, lblResProfitability, valResProfitability, "Рентабельность продукции: ", reY, Color.DarkCyan, false, "Profitability"); reY += 28;
+            AddInfoRow(groupBoxEfficiency, lblResROS, valResROS, "Рентабельность продаж (ROS): ", reY, Color.DarkCyan, false, "ROS");
+            rightY += 200;
 
-            groupBoxBreakEven.Location = new Point(rightX, rightY); groupBoxBreakEven.Size = new Size(520, 150); groupBoxBreakEven.Text = "Точка безубыточности и запас прочности";
+            groupBoxBreakEven.Location = new Point(rightX, rightY); groupBoxBreakEven.Size = new Size(520, 180); groupBoxBreakEven.Text = "Точка безубыточности и запас прочности";
             int rbY = 25;
-            AddResultRow(lblResBEPUnits, valResBEPUnits, "BEP (в шт.):", rbY, Color.Red); rbY += 25;
-            AddResultRow(lblResBEPValue, valResBEPValue, "BEP (в руб.):", rbY, Color.Red); rbY += 25;
-            AddResultRow(lblResSafetyUnits, valResSafetyUnits, "Запас прочности (шт):", rbY + 5, Color.Green); rbY += 25;
-            AddResultRow(lblResSafetyPerc, valResSafetyPerc, "Запас прочности (%):", rbY, Color.Green);
-            groupBoxBreakEven.Controls.AddRange(new Control[] { lblResBEPUnits, valResBEPUnits, lblResBEPValue, valResBEPValue, lblResSafetyUnits, valResSafetyUnits, lblResSafetyPerc, valResSafetyPerc });
-
+            AddInfoRow(groupBoxBreakEven, lblResBEPUnits, valResBEPUnits, "BEP (в шт.): ", rbY, Color.Red, false, "BEPUnits"); rbY += 28;
+            AddInfoRow(groupBoxBreakEven, lblResBEPValue, valResBEPValue, "BEP (в руб.): ", rbY, Color.Red, false, "BEPValue"); rbY += 28;
+            AddInfoRow(groupBoxBreakEven, lblResSafetyUnits, valResSafetyUnits, "Запас прочности (шт): ", rbY + 5, Color.Green, false, "SafetyUnits"); rbY += 28;
+            AddInfoRow(groupBoxBreakEven, lblResSafetyPerc, valResSafetyPerc, "Запас прочности (%): ", rbY, Color.Green, false, "SafetyPerc");
             // ==========================================
             // 5. ДОБАВЛЕНИЕ НА ВКЛАДКУ
             // ==========================================

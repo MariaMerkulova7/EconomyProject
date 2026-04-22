@@ -144,5 +144,24 @@ namespace EduCostCalc.Services
             _company.VariableCosts.GetTotalVariableCosts(_company.Production.OutputVolume);
 
         public decimal CalculateTotalRevenue() => _company.Production.TotalRevenue;
+
+        /// <summary>
+        /// Предельные издержки (MC = ΔTC / ΔQ). 
+        /// В линейной модели при ΔQ=1: MC = Переменные затраты на ед. + Соц. отчисления на доп. ЗП.
+        /// </summary>
+        public decimal CalculateMarginalCost()
+        {
+            if (_company.Production.OutputVolume <= 0) return 0;
+
+            // MC = d(TC)/dQ. Постоянные издержки (FC) не влияют на прирост.
+            // На каждую дополнительную единицу тратятся:
+            // 1. Сырьё + Энергия + Сдельная ЗП (уже есть в TotalVariableCostPerUnit)
+            // 2. Соц. отчисления именно на эту дополнительную сдельную ЗП
+            decimal variablePerUnit = _company.VariableCosts.TotalVariableCostPerUnit;
+            decimal socialOnMarginalWage = _company.VariableCosts.PieceworkWagePerUnit *
+                                           _company.TaxSettings.SocialContributionCoefficient;
+
+            return variablePerUnit + socialOnMarginalWage;
+        } 
     }
 }
